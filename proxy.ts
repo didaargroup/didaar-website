@@ -1,7 +1,6 @@
 import createMiddleware from 'next-intl/middleware';
 import {routing} from './i18n/routing';
- 
-export default createMiddleware(routing);
+import { NextRequest } from 'next/server';
  
 export const config = {
   // Match all pathnames except for
@@ -12,15 +11,16 @@ export const config = {
 };
 
 
+
 // In your middleware
-// export async function middleware(request: NextRequest) {
-//   const session = await getSession(request);
+export async function middleware(request: NextRequest) {
+  // const session = await getSession(request);
   
-//   // Simple boolean check - no complex logic
-//   if (!session && request.nextUrl.pathname.startsWith('/admin')) {
-//     return NextResponse.redirect(new URL('/login', request.url));
-//   }
+  // Simple boolean check - no complex logic
+  // if (!session && request.nextUrl.pathname.startsWith('/admin')) {
+  //   return NextResponse.redirect(new URL('/login', request.url));
+  // }
   
-//   // Then apply next-intl middleware
-//   return createMiddleware(routing)(request);
-// }
+  // Then apply next-intl middleware
+  return createMiddleware(routing)(request);
+}
