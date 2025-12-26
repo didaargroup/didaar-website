@@ -29,6 +29,27 @@
       "when": 1766709766240,
       "tag": "0003_boring_malice",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1766737937828,
+      "tag": "0004_acoustic_dakota_north",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1766739222958,
+      "tag": "0005_flowery_quasar",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1766740421576,
+      "tag": "0006_nice_archangel",
+      "breakpoints": true
     }
   ]
 }

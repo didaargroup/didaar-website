@@ -1,67 +1,18 @@
 import { requireAuth } from "@/lib/route-guard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { SortableTree, PageTreeNode } from "@/components/admin/sortable-tree";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import Link from "next/link";
+import { getPagesTree, getPageStats } from "@/lib/page";
+import { PagesTree } from "./pages-tree";
 
 export default async function DashboardPage() {
   // Protect this route - requires authentication and accepted invitation
   const { user } = await requireAuth({ requireInvitation: true });
 
-  // Mock data for pages tree - this will be replaced with database data later
-  const mockPages: PageTreeNode[] = [
-    {
-      id: "Home",
-      title: "Home",
-      slug: "/",
-      children: [
-        {
-          id: "About Us",
-          title: "About Us",
-          slug: "/about",
-        },
-        {
-          id: "Services",
-          title: "Services",
-          slug: "/services",
-          children: [
-            {
-              id: "Web Development",
-              title: "Web Development",
-              slug: "/services/web-development",
-            },
-            {
-              id: "Mobile Apps",
-              title: "Mobile Apps",
-              slug: "/services/mobile-apps",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: "Blog",
-      title: "Blog",
-      slug: "/blog",
-      children: [
-        {
-          id: "Getting Started",
-          title: "Getting Started",
-          slug: "/blog/getting-started",
-        },
-        {
-          id: "Advanced Features",
-          title: "Advanced Features",
-          slug: "/blog/advanced-features",
-        },
-      ],
-    },
-    {
-      id: "Contact",
-      title: "Contact",
-      slug: "/contact",
-    },
-  ];
+  // Get real data from database
+  const pagesTree = await getPagesTree();
+  const stats = await getPageStats();
 
   return (
     <div className="p-6 space-y-6">
@@ -75,25 +26,28 @@ export default async function DashboardPage() {
             Manage your site pages and content structure
           </p>
         </div>
-        <Button>
+
+        <div className="flex space-x-2">
+        <Button asChild variant="outline">
+          <Link href="/admin/pages/create">
           <Plus className="h-4 w-4 mr-2" />
           New Page
+          </Link>
         </Button>
+        </div>
       </header>
 
       {/* Pages Tree Card */}
-
-          <SortableTree items={mockPages} />
-   
+      <PagesTree initialItems={pagesTree} />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Total Pages</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-foreground">9</p>
+            <p className="text-3xl font-bold text-foreground">{stats.total}</p>
             <p className="text-sm text-muted-foreground mt-1">
               Across all sections
             </p>
@@ -105,7 +59,7 @@ export default async function DashboardPage() {
             <CardTitle className="text-base">Published</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-foreground">7</p>
+            <p className="text-3xl font-bold text-foreground">{stats.published}</p>
             <p className="text-sm text-muted-foreground mt-1">
               Live on the site
             </p>
@@ -117,13 +71,13 @@ export default async function DashboardPage() {
             <CardTitle className="text-base">Drafts</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold text-foreground">2</p>
+            <p className="text-3xl font-bold text-foreground">{stats.drafts}</p>
             <p className="text-sm text-muted-foreground mt-1">
               In progress
             </p>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -1,5 +1,7 @@
 "use server";
 
+
+import { z } from "zod";
 import { redirect } from "next/navigation";
 import { generateState } from "arctic";
 import { github } from "@/lib/oauth";
@@ -7,6 +9,22 @@ import { cookies } from "next/headers";
 import { deleteSessionTokenCookie, getCurrentSession, invalidateSession } from "@/lib/session";
 import { getInvitationByCode, isInvitationValid, useInvitation } from "@/lib/invitation";
 import { acceptInvitationForUser } from "@/lib/users";
+import { tryCatch } from "@/lib/utils";
+import { db } from "@/db";
+import { pages, pageTranslations } from "@/db/schema";
+import { revalidatePath } from "next/cache";
+import { eq } from "drizzle-orm";
+
+type FormState = {
+  errors?: {
+    title?: string[]
+    slug?: string[]
+    isDraft?: string[]
+    parentId?: string[]
+    _form?: string[]
+  }
+  success?: boolean
+}
 
 export async function logout() {
 	const { session } = await getCurrentSession();
@@ -111,3 +129,131 @@ export async function submitInvitation(prevState: { error: string }, formData: F
 	redirect("/admin");
 }
 
+
+
+ 
+const createPageSchema = z.object({
+	title: z.string().min(1).max(100),
+})
+
+function slugify(text: string) : string {
+	return text.toLowerCase()
+		.replace(/\s+/g, '-')
+		.replace(/[^a-z0-9-]/g, '')
+		.replace(/-+/g, '-')
+		.trim();
+}
+
+export async function createPageAction(prevState: FormState, formData: FormData) {
+	const { user } = await getCurrentSession();
+	if (!user) {
+		redirect("/login");
+	}
+
+	const rawTitle = formData.get("title");
+
+	const validatedFields = createPageSchema.safeParse({
+		title: rawTitle,
+	});
+
+	if (!validatedFields.success) {
+		return {
+			errors: validatedFields.error.flatten().fieldErrors,
+		};
+	}
+
+	// Generate slug from title if not provided
+	const slug = slugify(validatedFields.data.title);
+
+	try {
+		const [newPage] = await db.insert(pages).values({
+			title: validatedFields.data.title,
+			slug: slug,
+			isDraft: true,
+		}).returning();
+
+		// Create initial translations for both locales
+		await db.insert(pageTranslations).values([
+			{
+				pageId: newPage.id,
+				locale: "en",
+				title: validatedFields.data.title,
+				content: { root: { props: {}, children: [] }},
+			},
+			{
+				pageId: newPage.id,
+				locale: "fa",
+				title: validatedFields.data.title,
+				content: { root: { props: {}, children: [] } },
+			},
+		]);
+
+		revalidatePath("/admin");
+	} catch (error) {
+		console.log("Error creating page:", error);
+		return {
+			errors: {
+				_form: ["Failed to create page. Please try again."],
+			},
+		};
+	}
+
+	redirect("/admin")
+}
+
+/**
+ * Save page order after drag and drop reordering
+ */
+export async function savePageOrder(prevState: FormState, formData: FormData) {
+	const { user } = await getCurrentSession();
+	if (!user) {
+		return {
+			errors: {
+				_form: ["You must be logged in to save page order"],
+			},
+		};
+	}
+
+	// Get the order data from form data
+	const orderData = formData.get("order");
+	if (!orderData || typeof orderData !== "string") {
+		return {
+			errors: {
+				_form: ["Invalid order data"],
+			},
+		};
+	}
+
+	try {
+		const pagesOrder = JSON.parse(orderData) as Array<{
+			id: string;
+			parentId: string | null;
+			sortOrder: number;
+		}>;
+
+		console.log("Saving page order:", pagesOrder);
+
+		// Update each page's parent and sort order
+		for (const page of pagesOrder) {
+			console.log(`Updating page ${page.id}: parentId=${page.parentId}, sortOrder=${page.sortOrder}`);
+			await db
+				.update(pages)
+				.set({
+					parentId: page.parentId ? Number(page.parentId) : null,
+					sortOrder: page.sortOrder,
+				})
+				.where(eq(pages.id, Number(page.id)));
+		}
+
+		revalidatePath("/admin");
+
+		return { success: true };
+	} catch (error) {
+		console.error("Error saving page order:", error);
+		return {
+			errors: {
+				_form: ["Failed to save page order. Please try again."],
+			},
+		};
+	}
+}

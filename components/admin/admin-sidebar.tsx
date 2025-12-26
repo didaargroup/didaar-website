@@ -83,7 +83,7 @@ export function AdminSidebar() {
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                   )}
                 >
-                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  <Icon className="h-5 w-5 shrink-0" />
                   {item.name}
                 </Link>
               );

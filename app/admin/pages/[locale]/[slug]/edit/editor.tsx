@@ -1,7 +1,6 @@
 "use client";
 
 import { Puck, Config } from "@measured/puck";
-import "@measured/puck/puck.css";
  
 type Props = {
   HeadingBlock: { children: string };

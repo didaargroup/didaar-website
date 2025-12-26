@@ -150,6 +150,83 @@ import { Button } from "@/components/ui/button";
 </form>
 ```
 
+**Complete form example (Server Actions + useFormState):**
+```tsx
+"use client"
+
+import { someAction } from "@/app/actions"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useFormState } from "react-dom"
+
+type FormState = {
+  errors?: {
+    title?: string[]
+    email?: string[]
+    _form?: string[]
+  }
+}
+
+const initialState = {
+  errors: {},
+}
+
+export function MyForm() {
+  const [state, formAction] = useFormState(someAction, initialState)
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Form Title</CardTitle>
+        <CardDescription>Brief description of the form</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form action={formAction} className="space-y-4">
+          {/* Text Input */}
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              name="title"
+              type="text"
+              placeholder="Enter title"
+              required
+              className={state.errors && 'title' in state.errors ? "border-destructive" : ""}
+            />
+            {state.errors && 'title' in state.errors && Array.isArray(state.errors.title) && state.errors.title.length > 0 && (
+              <p className="text-xs text-destructive">{state.errors.title[0]}</p>
+            )}
+          </div>
+
+          {/* Checkbox */}
+          <div className="flex items-center gap-2">
+            <Checkbox id="agree" name="agree" />
+            <Label htmlFor="agree" className="cursor-pointer">
+              I agree to the terms
+            </Label>
+          </div>
+
+          {/* Form-level error */}
+          {state.errors && '_form' in state.errors && Array.isArray(state.errors._form) && state.errors._form.length > 0 && (
+            <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+              <p className="text-sm text-destructive">{state.errors._form[0]}</p>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <Button type="submit" className="w-full">
+            Submit
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  )
+}
+```
+
 **❌ NEVER use inline styles for forms:**
 ```tsx
 // BAD
@@ -158,6 +235,31 @@ import { Button } from "@/components/ui/button";
   padding: "0.75rem", 
   border: "1px solid #ccc" 
 }} />
+```
+
+**Checkboxes:**
+```tsx
+import { Checkbox } from "@/components/ui/checkbox";
+
+<div className="flex items-center gap-2">
+  <Checkbox
+    id="terms"
+    name="terms"
+    defaultChecked={false}
+  />
+  <Label htmlFor="terms" className="cursor-pointer">
+    I agree to the terms and conditions
+  </Label>
+</div>
+```
+
+**❌ NEVER use native checkboxes:**
+```tsx
+// BAD
+<input
+  type="checkbox"
+  className="h-4 w-4 rounded border-gray-300"
+/>
 ```
 
 ### 4. Typography
@@ -202,11 +304,11 @@ import { Button } from "@/components/ui/button";
 
 ### 6. Error Messages
 
-**Inline error:**
+**Inline error (form-level):**
 ```tsx
 {error && (
-  <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-    {error}
+  <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+    <p className="text-sm text-destructive">{error}</p>
   </div>
 )}
 ```
@@ -214,12 +316,50 @@ import { Button } from "@/components/ui/button";
 **Form field error:**
 ```tsx
 <div className="space-y-2">
-  <label>Email</label>
-  <input className={errors.email ? "border-destructive" : ""} />
+  <Label htmlFor="email">Email</Label>
+  <Input
+    id="email"
+    type="email"
+    className={errors.email ? "border-destructive focus:ring-destructive" : ""}
+  />
   {errors.email && (
     <p className="text-xs text-destructive">{errors.email}</p>
   )}
 </div>
+```
+
+**Server action form errors (with useFormState):**
+```tsx
+type FormState = {
+  errors?: {
+    fieldName?: string[]
+    _form?: string[]
+  }
+}
+
+// In component:
+const [state, formAction] = useFormState(serverAction, initialState)
+
+// Field-level error:
+<Input
+  className={state.errors && 'fieldName' in state.errors ? "border-destructive" : ""}
+/>
+{state.errors && 'fieldName' in state.errors && Array.isArray(state.errors.fieldName) && state.errors.fieldName.length > 0 && (
+  <p className="text-xs text-destructive">{state.errors.fieldName[0]}</p>
+)}
+
+// Form-level error:
+{state.errors && '_form' in state.errors && Array.isArray(state.errors._form) && state.errors._form.length > 0 && (
+  <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+    <p className="text-sm text-destructive">{state.errors._form[0]}</p>
+  </div>
+)}
+```
+
+**❌ NEVER use inline styles for error messages:**
+```tsx
+// BAD
+<p style={{ color: "red", fontSize: "12px" }}>{error}</p>
 ```
 
 ### 7. Icons
