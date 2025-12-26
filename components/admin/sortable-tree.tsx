@@ -70,12 +70,12 @@ function flattenTree(
   depth = 0
 ): FlattenedItem[] {
   return items.reduce<FlattenedItem[]>((acc, item, index) => {
-    const flattenedItem = {
+    const flattenedItem: FlattenedItem = {
       id: item.id,
       parentId,
       depth,
       index,
-      children: item.children || [],
+      children: [],
       collapsed: item.collapsed
     };
     
