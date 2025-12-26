@@ -32,6 +32,34 @@ export function isInvitationValid(invitation: any): boolean {
   return true;
 }
 
+export function getInvitationStatus(invitation: any): { valid: boolean; reason?: string } {
+  if (!invitation) {
+    return { valid: false, reason: "Invitation not found" };
+  }
+  
+  if (invitation.usedBy !== null) {
+    return { valid: false, reason: "Already used" };
+  }
+  
+  if (new Date() > invitation.expiresAt) {
+    return { valid: false, reason: "Expired" };
+  }
+  
+  return { valid: true };
+}
+
+export function formatInvitationCode(code: string): string {
+  // Remove any non-hex characters and convert to uppercase
+  const cleaned = code.toUpperCase().replace(/[^A-F0-9]/g, '');
+  
+  // Format as XXXX-XXXX-XXXX
+  if (cleaned.length === 12) {
+    return `${cleaned.slice(0, 4)}-${cleaned.slice(4, 8)}-${cleaned.slice(8, 12)}`;
+  }
+  
+  return code;
+}
+
 export async function useInvitation(code: string, userId: number) {
   const invitation = await getInvitationByCode(code);
   if (!invitation) {

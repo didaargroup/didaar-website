@@ -13,6 +13,8 @@ export async function GET(request: Request): Promise<Response> {
 	const state = url.searchParams.get("state");
 	const cookieStore = await cookies();
 	const storedState = cookieStore.get("github_oauth_state")?.value ?? null;
+	const storedRedirect = cookieStore.get("github_oauth_redirect")?.value ?? null;
+
 	if (code === null || state === null || storedState === null) {
 		return new Response(null, {
 			status: 400
@@ -55,18 +57,19 @@ export async function GET(request: Request): Promise<Response> {
 	const session = await createSession(sessionToken, user.id);
 	await setSessionTokenCookie(sessionToken, session.expiresAt);
 
+	// Determine where to redirect after login
+	let redirectPath = "/";
+
 	// Check if user has accepted invitation
 	if (user.invitationAcceptedAt === null) {
 		// User authenticated but needs to accept invitation
-		return redirect("/signup");
+		// Use stored redirect if available (should include locale), otherwise default
+		redirectPath = storedRedirect || "/en/invitation/validate";
+	} else if (storedRedirect) {
+		// User has invitation, use stored redirect
+		redirectPath = storedRedirect;
 	}
 
-	// User is fully authenticated and has accepted invitation
-	return new Response(null, {
-		status: 302,
-		headers: {
-			Location: "/"
-		}
-	});
+	return redirect(redirectPath);
 
 }

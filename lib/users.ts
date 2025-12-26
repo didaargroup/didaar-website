@@ -20,3 +20,8 @@ export const acceptInvitationForUser = (userId: number): Promise<void> => {
         invitationAcceptedAt: new Date()
     }).where(eq(users.id, userId)).then(() => {});
 }
+
+export const userNeedsInvitation = (user: User | null): boolean => {
+    if (!user) return false;
+    return user.invitationAcceptedAt === null;
+}
