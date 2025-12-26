@@ -2,6 +2,8 @@
 
 import { submitInvitation } from "@/app/actions";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useActionState } from "react";
 
 const initialState = {
@@ -9,18 +11,14 @@ const initialState = {
     success: false,
 };
 
-
 export default function InvitationValidateForm() {
-
     const [state, formAction, isPending] = useActionState(submitInvitation, initialState);
 
     return (
         <form action={formAction} className="space-y-4">
             <div className="space-y-2">
-                <label htmlFor="code" className="text-sm font-medium text-gray-900 dark:text-white">
-                    Invitation Code
-                </label>
-                <input
+                <Label htmlFor="code">Invitation Code</Label>
+                <Input
                     type="text"
                     id="code"
                     name="code"
@@ -28,7 +26,7 @@ export default function InvitationValidateForm() {
                     maxLength={14}
                     disabled={isPending}
                     required
-                    className="w-full px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-center text-lg tracking-widest uppercase focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed font-mono"
+                    className="text-center text-lg tracking-widest uppercase font-mono"
                     autoComplete="off"
                 />
                 <p className="text-xs text-muted-foreground">
@@ -56,5 +54,5 @@ export default function InvitationValidateForm() {
                 {isPending ? "Verifying..." : "Complete Registration"}
             </Button>
         </form>
-    )
+    );
 }
