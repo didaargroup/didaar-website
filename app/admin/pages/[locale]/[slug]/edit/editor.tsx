@@ -3,6 +3,7 @@
 import { Puck, Config } from "@measured/puck";
 import { useActionState, useTransition } from "react";
 import { savePageContent } from "@/app/actions";
+import config from "@/puck.config";
 
 type EditorProps = {
   pageId: number;
@@ -24,20 +25,20 @@ const initialState: FormState = {
 };
 
 // Create Puck component config
-const config: Config<any> = {
-  components: {
-    HeadingBlock: {
-      fields: {
-        children: {
-          type: "text",
-        },
-      },
-      render: ({ children }) => {
-        return <h1>{children}</h1>;
-      },
-    },
-  },
-};
+// const config: Config<any> = {
+//   components: {
+//     HeadingBlock: {
+//       fields: {
+//         children: {
+//           type: "text",
+//         },
+//       },
+//       render: ({ children }) => {
+//         return <h1>{children}</h1>;
+//       },
+//     },
+//   },
+// };
 
 export default function Editor({
   pageId,

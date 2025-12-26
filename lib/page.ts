@@ -50,7 +50,6 @@ function buildPageTree(
       };
     });
 
-    console.log("Filtered Pages:", filteredPages);
   return filteredPages;
 }
 

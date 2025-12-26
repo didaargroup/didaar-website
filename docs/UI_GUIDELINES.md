@@ -4,36 +4,417 @@ This document establishes the UI patterns, styling conventions, and design syste
 
 ## Design System Overview
 
-### Color Palette (Tailwind CSS v4 + CSS Variables)
+### Critical: Dual Component Library Architecture
 
-The application uses OKLCH color space for better perceptual uniformity and dark mode support.
+**This project uses TWO different component libraries:**
 
-**Semantic Color Tokens:**
-```css
-/* Primary Actions & Brand */
---primary: oklch(0.21 0.006 285.885)        /* Dark purple-gray */
---primary-foreground: oklch(0.985 0 0)      /* Near white */
+| Area | Component Library | Location |
+|------|-------------------|----------|
+| **Admin Dashboard** | `@measured/puck` v0.20.2 | `/admin/*` routes |
+| **Public/Guest Area** | Shadcn UI | `/app/[locale]/*` routes |
 
-/* Secondary Elements */
---secondary: oklch(0.967 0.001 286.375)     /* Light gray */
---secondary-foreground: oklch(0.21 0.006 285.885) /* Dark */
+**Why?** The admin area uses Puck's components to maintain visual consistency with the page editor. The public area uses Shadcn UI for a traditional, accessible component library.
 
-/* Backgrounds */
---background: oklch(1 0 0)                  /* Pure white */
---card: oklch(1 0 0)                        /* Card background */
---popover: oklch(1 0 0)                     /* Popover background */
+**⚠️ Important:** Never mix these libraries. Use Puck components in admin routes and Shadcn components in public routes.
 
-/* Text */
---foreground: oklch(0.141 0.005 285.823)    /* Near black */
---muted-foreground: oklch(0.552 0.016 285.938) /* Gray text */
+### Admin Area - @measured/puck Components
 
-/* Interactive States */
---accent: oklch(0.967 0.001 286.375)        /* Hover backgrounds */
---accent-foreground: oklch(0.21 0.006 285.885) /* Hover text */
+**Location**: All files in `app/admin/` directory
 
-/* Destructive Actions */
---destructive: oklch(0.577 0.245 27.325)    /* Red */
+**Import Pattern:**
+```tsx
+import { Button, ActionBar, IconButton } from "@measured/puck";
 ```
+
+**Available Components:**
+- **Button** - Primary and secondary buttons with icon support
+- **ActionBar** - Action bar with label and action buttons
+- **IconButton** - Icon-only buttons with tooltips
+- **Drawer** - Collapsible drawer for navigation
+- **DropZone** - Drop zone for drag-and-drop
+- **FieldLabel** - Labels for form fields
+- **Label** - Text label component
+- **AutoField** - Auto-rendering field component
+
+**📖 Complete Reference:** See [puck-compatible-ui/components-guide.md](./puck-compatible-ui/components-guide.md)
+
+**Styling Approach:**
+- Uses CSS variables defined in Puck's CSS
+- Inline styles with CSS custom properties
+- No Tailwind classes on Puck components
+- Example: `style={{ background: "var(--puck-color-grey-12)" }}`
+
+### Public Area - Shadcn UI Components
+
+**Location**: All files in `app/[locale]/` directory
+
+**Import Pattern:**
+```tsx
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+```
+
+**Available Components:**
+- **Button** - Various button variants
+- **Card** - Card containers with header and content
+- **Input** - Text input fields
+- **Label** - Form labels
+- **Checkbox** - Checkbox inputs
+- **Badge** - Status badges
+- **Collapsible** - Collapsible content sections
+
+**Styling Approach:**
+- Tailwind CSS utility classes
+- Example: `className="bg-primary text-primary-foreground hover:bg-primary/90"`
+
+---
+
+## Core Styling Principles
+
+### 1. Never Use Inline Styles (Except with Puck)
+
+**❌ Wrong:**
+```tsx
+<div style={{ padding: "16px", background: "#f5f5f5" }}>
+```
+
+**✅ Right (Tailwind):**
+```tsx
+<div className="p-4 bg-gray-100">
+```
+
+**✅ Right (Puck CSS variables):**
+```tsx
+<div style={{ padding: "var(--puck-space-px)", background: "var(--puck-color-grey-11)" }}>
+```
+
+### 2. Use Semantic Color Tokens
+
+**Puck Colors (Admin):**
+```css
+--puck-color-white: #ffffff
+--puck-color-black: #000000
+--puck-color-grey-05: #767676
+--puck-color-grey-09: #dcdcdc
+--puck-color-grey-10: #efefef
+--puck-color-grey-11: #f5f5f5
+--puck-color-grey-12: #fafafa
+--puck-color-azure-04: #0158ad
+```
+
+**Tailwind Colors (Public):**
+```tsx
+bg-primary, text-primary-foreground
+bg-secondary, text-secondary-foreground
+bg-muted, text-muted-foreground
+bg-destructive, text-destructive
+```
+
+### 3. Always Include Dark Mode Support
+
+**Puck Components:** Dark mode is handled automatically via CSS variables.
+
+**Tailwind Classes:** Always add `dark:` variants:
+```tsx
+<div className="bg-white dark:bg-gray-900">
+  <h1 className="text-gray-900 dark:text-white">
+    Title
+  </h1>
+</div>
+```
+
+### 4. Use the `cn()` Helper for Conditional Classes
+
+```tsx
+import { cn } from "@/lib/utils";
+
+<div className={cn(
+  "base-class",
+  isActive && "active-class",
+  "dark:dark-mode-class"
+)}>
+```
+
+---
+
+## Common UI Patterns
+
+### Spacing System
+
+**Puck (Admin):**
+```css
+--puck-space-px: 16px
+padding: var(--puck-space-px)
+gap: calc(var(--puck-space-px) * 0.75)  /* 12px */
+```
+
+**Tailwind (Public):**
+```tsx
+p-4    /* 16px */
+p-6    /* 24px */
+gap-2  /* 8px */
+gap-4  /* 16px */
+```
+
+### Typography
+
+**Puck (Admin):**
+```css
+--puck-font-size-xxs: 14px
+--puck-font-size-xs: 16px
+--puck-font-size-s: 18px
+--puck-font-size-m: 21px
+```
+
+**Tailwind (Public):**
+```tsx
+text-sm   /* 14px */
+text-base /* 16px */
+text-lg   /* 18px */
+text-xl   /* 20px */
+```
+
+### Error Styling
+
+**Field Error:**
+```tsx
+<Input className={hasError ? "border-destructive" : ""} />
+{hasError && <p className="text-xs text-destructive">{error}</p>}
+```
+
+**Form-Level Error:**
+```tsx
+<div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+  <p className="text-sm text-destructive">{error}</p>
+</div>
+```
+
+---
+
+## Layout Patterns
+
+### Centered Form Layout
+
+```tsx
+<div className="flex items-center justify-center min-h-[calc(100vh-4rem)] p-6">
+  <div className="w-full max-w-lg">
+    <Card>
+      <CardHeader>
+        <CardTitle>Title</CardTitle>
+        <CardDescription>Description</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {/* Form content */}
+      </CardContent>
+    </Card>
+  </div>
+</div>
+```
+
+### Admin Dashboard Layout
+
+The admin dashboard uses a custom layout with:
+- **Header**: Puck-style header with toggle button
+- **Sidebar**: Collapsible navigation drawer
+- **Main Content**: Scrollable content area
+
+**Layout Structure:**
+```
+┌─────────────────────────────────────────┐
+│  Header (toggle, title, actions)       │
+├──────────┬──────────────────────────────┤
+│          │                              │
+│ Sidebar  │  Main Content                │
+│ (nav)    │  (flex-1, overflow-auto)     │
+│          │                              │
+└──────────┴──────────────────────────────┘
+```
+
+**Implementation:** See `app/admin/(dashboard)/layout.tsx`
+
+---
+
+## Form Patterns
+
+### Server Action Forms (React 19)
+
+**⚠️ Critical:** Always use `useActionState` from `"react"`, NOT `useFormState` from `"react-dom"`.
+
+```tsx
+"use client"
+
+import { useActionState } from "react"
+import { someAction } from "@/app/actions"
+import { Button } from "@measured/puck"  // Admin
+// import { Button } from "@/components/ui/button"  // Public
+
+type FormState = {
+  errors?: {
+    fieldName?: string[]
+    _form?: string[]
+  }
+  success?: boolean
+}
+
+const initialState: FormState = {}
+
+export function MyForm() {
+  const [state, formAction] = useActionState(someAction, initialState)
+
+  return (
+    <form action={formAction} className="space-y-4">
+      {/* Field with error */}
+      <div className="space-y-2">
+        <Label htmlFor="title">Title</Label>
+        <Input
+          id="title"
+          name="title"
+          className={state.errors?.title ? "border-destructive" : ""}
+        />
+        {state.errors?.title && (
+          <p className="text-xs text-destructive">{state.errors.title[0]}</p>
+        )}
+      </div>
+
+      {/* Form-level error */}
+      {state.errors?._form && (
+        <div className="p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+          <p className="text-sm text-destructive">{state.errors._form[0]}</p>
+        </div>
+      )}
+
+      <Button type="submit">Submit</Button>
+    </form>
+  )
+}
+```
+
+**📖 Complete Guide:** See [server-actions/nextjs-server-actions.md](./server-actions/nextjs-server-actions.md)
+
+---
+
+## Common Pitfalls
+
+### ❌ Don't Mix Component Libraries
+
+```tsx
+// WRONG - Using Shadcn in admin
+import { Button } from "@/components/ui/button";
+
+// RIGHT - Using Puck in admin
+import { Button } from "@measured/puck";
+```
+
+### ❌ Don't Use Inline Styles (Except Puck Variables)
+
+```tsx
+// WRONG
+<div style={{ padding: "16px", color: "red" }}>
+
+// RIGHT (Tailwind)
+<div className="p-4 text-red-500">
+
+// RIGHT (Puck CSS variables)
+<div style={{ padding: "var(--puck-space-px)", color: "var(--puck-color-red-05)" }}>
+```
+
+### ❌ Don't Forget Dark Mode
+
+```tsx
+// WRONG
+<div className="bg-white text-gray-900">
+
+// RIGHT
+<div className="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
+```
+
+### ❌ Don't Call formAction Directly
+
+```tsx
+// WRONG
+<Button onClick={() => formAction(new FormData())}>
+
+// RIGHT
+<form action={formAction}>
+  <Button type="submit">Submit</Button>
+</form>
+```
+
+---
+
+## Component-Specific Guidelines
+
+### Puck Button (Admin)
+
+```tsx
+import { Button } from "@measured/puck";
+
+// Basic
+<Button variant="primary">Click me</Button>
+<Button variant="secondary">Cancel</Button>
+
+// With icon
+<Button variant="primary" icon={<Plus />}>
+  New page
+</Button>
+
+// As link
+<Button href="/admin/pages" variant="secondary">
+  View pages
+</Button>
+
+// ⚠️ Button does NOT accept className prop
+// Use wrapper div for custom styling
+<div className="my-custom-class">
+  <Button variant="primary">Click me</Button>
+</div>
+```
+
+### Shadcn Button (Public)
+
+```tsx
+import { Button } from "@/components/ui/button";
+
+// Basic
+<Button>Click me</Button>
+<Button variant="secondary">Cancel</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="outline">Outline</Button>
+
+// With icon
+<Button>
+  <Plus className="mr-2 h-4 w-4" />
+  New item
+</Button>
+
+// As link
+<Button asChild>
+  <Link href="/page">Go to page</Link>
+</Button>
+```
+
+---
+
+## Accessibility
+
+- Always provide `title` prop for `IconButton` components
+- Use semantic HTML (`<button>`, `<a>`, `<form>`)
+- Include proper ARIA labels for custom components
+- Ensure keyboard navigation works
+- Test with screen readers
+
+---
+
+## Resources
+
+- **[Puck Components Guide](./puck-compatible-ui/components-guide.md)** - Complete Puck component API
+- **[Server Actions Guide](./server-actions/nextjs-server-actions.md)** - Form handling patterns
+- **[Authentication Guide](./authentication/invitation-system.md)** - Auth flow documentation
+
+---
+
+**Last Updated**: December 26, 2025
+
 
 **Dark Mode (`.dark` class):**
 All colors automatically invert via CSS custom properties. Use `dark:` prefix for Tailwind utilities.
