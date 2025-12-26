@@ -10,11 +10,11 @@ export default async function DashboardLayout({
   await requireAuth({ requireInvitation: true });
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
-      <AdminSidebar />
-      <div className="flex flex-col flex-1 overflow-hidden">
-        <AdminHeader />
-        <main className="flex-1 overflow-auto p-6">
+    <div className="h-screen flex flex-col" style={{ backgroundColor: "var(--puck-color-grey-11)" }}>
+      <AdminHeader />
+      <div className="flex flex-1 overflow-hidden">
+        <AdminSidebar />
+        <main className="flex-1 overflow-auto">
           {children}
         </main>
       </div>

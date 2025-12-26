@@ -76,11 +76,10 @@ export function PagesTree({ initialItems }: PagesTreeProps) {
       <div className="w-full max-w-2xl">
         {/* Section header with separator */}
         <div className="flex items-center gap-4 mb-6">
-          <div className="flex-1 h-px bg-border"></div>
           <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
             Page Structure
           </h2>
-          <div className="flex-1 h-px bg-border"></div>
+        
         </div>
 
         {/* Tree container with subtle border and shadow */}

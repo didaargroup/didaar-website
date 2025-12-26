@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionBar, Button, IconButton } from "@measured/puck";
+import { Button, IconButton } from "@measured/puck";
 import { Home, LogOut, PanelLeft, Plus } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/actions";
@@ -8,7 +8,7 @@ import { logout } from "@/app/actions";
 export function AdminHeader() {
   const pathname = usePathname();
 
-  const toggleMobileSidebar = () => {
+  const toggleSidebar = () => {
     const sidebar = document.querySelector("[data-sidebar]") as HTMLElement;
     if (sidebar) {
       sidebar.classList.toggle("-translate-x-full");
@@ -16,46 +16,93 @@ export function AdminHeader() {
   };
 
   return (
-    <header className="border-b border-border bg-background">
-      <div className="flex items-center justify-between gap-4 px-6 py-3">
-        <div className="flex items-center gap-3">
-          <div className="lg:hidden">
-            <IconButton type="button" title="Toggle sidebar" onClick={toggleMobileSidebar}>
-              <PanelLeft focusable="false" />
-            </IconButton>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-              P
-            </div>
-            <div className="leading-tight">
-              <div className="text-sm font-semibold text-foreground">Puck Admin</div>
-              <div className="text-xs text-muted-foreground">{pathname?.replace("/", "") || "admin"}</div>
-            </div>
-          </div>
+    <header
+      style={{
+        background: "var(--puck-color-white)",
+        borderBottom: "1px solid var(--puck-color-grey-09)",
+        color: "var(--puck-color-black)",
+        gridArea: "header",
+        position: "relative",
+        maxWidth: "100vw"
+      }}
+    >
+      <div
+        style={{
+          alignItems: "end",
+          display: "grid",
+          gap: "16px",
+          gridTemplateAreas: '"left middle right"',
+          gridTemplateColumns: "1fr auto 1fr",
+          gridTemplateRows: "auto",
+          padding: "16px"
+        }}
+      >
+        {/* Left side - Toggle buttons (always visible like Puck) */}
+        <div
+          style={{
+            color: "var(--puck-color-grey-05)",
+            display: "flex",
+            marginInlineStart: "-4px",
+            paddingTop: "2px"
+          }}
+        >
+          <IconButton
+            type="button"
+            title="Toggle left sidebar"
+            onClick={toggleSidebar}
+          >
+            <PanelLeft focusable="false" />
+          </IconButton>
         </div>
 
-        <ActionBar label="Actions">
-          <ActionBar.Action onClick={() => {}}>
-            <Button href="/admin/pages/create" variant="primary" icon={<Plus className="h-4 w-4" />}>
-              New page
-            </Button>
-          </ActionBar.Action>
+        {/* Middle - Title (using Puck's Heading style) */}
+        <div
+          style={{
+            alignSelf: "center",
+            display: "block",
+            color: "var(--puck-color-black)",
+            fontWeight: 700,
+            margin: 0,
+            fontSize: "16px"
+          }}
+        >
+          {pathname?.replace("/admin", "") || "Dashboard"}
+        </div>
 
-          <ActionBar.Action onClick={() => {}}>
-            <Button href="/" variant="secondary" icon={<Home className="h-4 w-4" />} newTab>
-              View site
-            </Button>
-          </ActionBar.Action>
+        {/* Right side - Actions */}
+        <div
+          style={{
+            display: "flex",
+            gap: "16px",
+            justifyContent: "flex-end",
+            alignItems: "center"
+          }}
+        >
+          <Button
+            href="/admin/pages/create"
+            variant="primary"
+            icon={<Plus style={{ width: "14px", height: "14px" }} />}
+          >
+            New page
+          </Button>
 
-          <ActionBar.Action onClick={() => {}}>
-            <form action={logout}>
-              <Button type="submit" variant="secondary" icon={<LogOut className="h-4 w-4" />}>
-                Logout
-              </Button>
-            </form>
-          </ActionBar.Action>
-        </ActionBar>
+          <Button
+            href="/"
+            variant="secondary"
+            icon={<Home style={{ width: "14px", height: "14px" }} />}
+            newTab
+          >
+            View site
+          </Button>
+
+          <Button
+            variant="secondary"
+            icon={<LogOut style={{ width: "14px", height: "14px" }} />}
+            onClick={logout}
+          >
+            Logout
+          </Button>
+        </div>
       </div>
     </header>
   );

@@ -35,14 +35,34 @@ export function AdminSidebar() {
       <aside
         data-sidebar
         className={cn(
-          "fixed top-0 left-0 z-50 h-screen w-64 bg-background border-r border-border transition-transform duration-300 ease-in-out lg:static lg:translate-x-0",
+          "fixed top-0 left-0 z-50 h-screen w-64 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex-shrink-0",
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
+        style={{
+          position: "relative",
+          display: "flex",
+          flexDirection: "column",
+          overflowY: "auto",
+          background: "var(--puck-color-grey-12)",
+          borderInlineEnd: "1px solid var(--puck-color-grey-09)",
+          gridArea: "left"
+        }}
       >
-        <div className="flex flex-col h-full">
+        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
           {/* Mobile close button */}
-          <div className="flex items-center justify-between h-16 px-4 border-b border-border lg:hidden">
-            <span className="text-lg font-semibold text-foreground">Menu</span>
+          <div
+            className="lg:hidden"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "16px",
+              borderBottom: "1px solid var(--puck-color-grey-09)"
+            }}
+          >
+            <span style={{ fontSize: "18px", fontWeight: 600, color: "var(--puck-color-black)" }}>
+              Menu
+            </span>
             <IconButton
               type="button"
               title="Close menu"
@@ -53,14 +73,32 @@ export function AdminSidebar() {
           </div>
 
           {/* Logo/Brand - Desktop only */}
-          <div className="hidden lg:flex items-center h-16 px-6 border-b border-border">
-            <Link href="/admin" className="flex items-center space-x-2">
-              <span className="text-xl font-bold text-foreground">Pucked</span>
+          <div
+            className="hidden lg:flex"
+            style={{
+              alignItems: "center",
+              padding: "16px",
+              borderBottom: "1px solid var(--puck-color-grey-09)"
+            }}
+          >
+            <Link
+              href="/admin"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                fontSize: "18px",
+                fontWeight: 700,
+                color: "var(--puck-color-black)",
+                textDecoration: "none"
+              }}
+            >
+              Pucked
             </Link>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-1">
+          <nav style={{ flex: 1, overflowY: "auto", padding: "12px" }}>
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
@@ -70,14 +108,34 @@ export function AdminSidebar() {
                   key={item.name}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full",
-                    isActive
-                      ? "bg-primary text-primary-foreground"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  )}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    padding: "8px 12px",
+                    borderRadius: "4px",
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    textDecoration: "none",
+                    width: "100%",
+                    backgroundColor: isActive ? "var(--puck-color-azure-04)" : "transparent",
+                    color: isActive ? "var(--puck-color-white)" : "var(--puck-color-grey-05)",
+                    transition: "background-color 50ms ease-in, color 50ms ease-in"
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = "var(--puck-color-grey-10)";
+                      e.currentTarget.style.color = "var(--puck-color-azure-04)";
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                      e.currentTarget.style.color = "var(--puck-color-grey-05)";
+                    }
+                  }}
                 >
-                  <Icon className="h-5 w-5 shrink-0" />
+                  <Icon style={{ width: "16px", height: "16px", flexShrink: 0 }} />
                   {item.name}
                 </Link>
               );
@@ -85,9 +143,9 @@ export function AdminSidebar() {
           </nav>
 
           {/* Footer */}
-          <div className="p-4 border-t border-border">
-            <p className="text-xs text-muted-foreground text-center">
-              © 2025 Pucked. All rights reserved.
+          <div style={{ padding: "16px", borderTop: "1px solid var(--puck-color-grey-09)" }}>
+            <p style={{ fontSize: "14px", color: "var(--puck-color-grey-05)", textAlign: "center" }}>
+              © 2025 Pucked
             </p>
           </div>
         </div>
