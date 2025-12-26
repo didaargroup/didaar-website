@@ -2,7 +2,13 @@
 import { db } from "@/db";
 import { pages, pageTranslations } from "@/db/schema";
 import { eq, and, isNull } from "drizzle-orm";
-import type { Page } from "@/db/schema";
+import type { Page, PageTranslation } from "@/db/schema";
+
+export interface PageTranslationStatus {
+  locale: string;
+  published: boolean;
+  hasContent: boolean;
+}
 
 export interface PageTreeNode {
   id: string;
@@ -10,6 +16,7 @@ export interface PageTreeNode {
   slug: string;
   isDraft: boolean;
   showOnMenu: boolean;
+  translations?: PageTranslationStatus[];
   children?: PageTreeNode[];
 }
 
@@ -18,19 +25,30 @@ export interface PageTreeNode {
  */
 function buildPageTree(
   pages: Page[],
+  translationsMap: Map<number, PageTranslation[]>,
   parentId: number | null = null
 ): PageTreeNode[] {
   const filteredPages = pages
     .filter((page) => page.parentId === parentId)
     .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((page) => ({
-      id: String(page.id),
-      title: page.title,
-      slug: page.slug,
-      isDraft: page.isDraft,
-      showOnMenu: page.showOnMenu,
-      children: buildPageTree(pages, page.id),
-    }));
+    .map((page) => {
+      const pageTranslations = translationsMap.get(page.id) || [];
+      const translationStatuses = pageTranslations.map(t => ({
+        locale: t.locale,
+        published: t.published,
+        hasContent: t.content !== null,
+      }));
+
+      return {
+        id: String(page.id),
+        title: page.title,
+        slug: page.slug,
+        isDraft: page.isDraft,
+        showOnMenu: page.showOnMenu,
+        translations: translationStatuses,
+        children: buildPageTree(pages, translationsMap, page.id),
+      };
+    });
 
     console.log("Filtered Pages:", filteredPages);
   return filteredPages;
@@ -41,7 +59,20 @@ function buildPageTree(
  */
 export async function getPagesTree(): Promise<PageTreeNode[]> {
   const allPages = await db.select().from(pages).orderBy(pages.sortOrder);
-  return buildPageTree(allPages, null);
+  
+  // Fetch all translations and group by pageId
+  const allTranslations = await db.select().from(pageTranslations);
+  const translationsMap = new Map<number, PageTranslation[]>();
+  
+  allTranslations.forEach(translation => {
+    const pageId = translation.pageId;
+    if (!translationsMap.has(pageId)) {
+      translationsMap.set(pageId, []);
+    }
+    translationsMap.get(pageId)!.push(translation);
+  });
+  
+  return buildPageTree(allPages, translationsMap, null);
 }
 
 /**

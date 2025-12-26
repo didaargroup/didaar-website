@@ -1,6 +1,13 @@
 import React, {forwardRef, HTMLAttributes} from 'react';
 import { GripVertical, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
+
+export interface PageTranslationStatus {
+  locale: string;
+  published: boolean;
+  hasContent: boolean;
+}
 
 export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
   childCount?: number;
@@ -14,6 +21,8 @@ export interface Props extends Omit<HTMLAttributes<HTMLLIElement>, 'id'> {
   indicator?: boolean;
   indentationWidth: number;
   value: string;
+  translations?: PageTranslationStatus[];
+  pageSlug?: string;
   onCollapse?(): void;
   onRemove?(): void;
   wrapperRef?(node: HTMLLIElement): void;
@@ -36,6 +45,8 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
       onRemove,
       style,
       value,
+      translations,
+      pageSlug,
       wrapperRef,
       ...props
     },
@@ -79,6 +90,30 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
             </Action>
           )}
           <span className="flex-1 truncate text-sm font-medium text-foreground">{value}</span>
+          
+          {/* Locale indicators */}
+          {!clone && translations && translations.length > 0 && (
+            <div className="flex items-center gap-1.5">
+              {translations.map((translation) => (
+                <Link
+                  key={translation.locale}
+                  href={`/admin/pages/${translation.locale}/${pageSlug}/edit`}
+                  className={cn(
+                    "flex items-center justify-center w-7 h-7 rounded-md text-xs font-semibold transition-colors",
+                    translation.published
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      : translation.hasContent
+                      ? "bg-muted text-muted-foreground hover:bg-muted/70"
+                      : "bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-700"
+                  )}
+                  title={`${translation.locale.toUpperCase()} - ${translation.published ? 'Published' : translation.hasContent ? 'Draft' : 'No content'}`}
+                >
+                  {translation.locale === 'en' ? 'EN' : 'FA'}
+                </Link>
+              ))}
+            </div>
+          )}
+          
           {!clone && onRemove && <Remove onClick={onRemove} />}
           {clone && childCount && childCount > 1 ? (
             <span className="text-xs text-muted-foreground">{childCount}</span>

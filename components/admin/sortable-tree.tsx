@@ -25,11 +25,13 @@ import { ArrowRight, ArrowLeft, X } from "lucide-react";
 import type { UniqueIdentifier } from "@dnd-kit/core";
 import type { TreeItem, FlattenedItem } from "@/components/types";
 import { Badge } from "../ui/badge";
+import type { PageTranslationStatus } from "@/lib/page";
 
 export interface PageTreeNode {
   id: string;
   title: string;
   slug: string;
+  translations?: PageTranslationStatus[];
   children?: PageTreeNode[];
   collapsed?: boolean;
 }
@@ -52,13 +54,19 @@ function toTreeItem(node: PageTreeNode): TreeItem {
 }
 
 // Helper to convert TreeItem to PageTreeNode
-function toPageTreeNode(item: TreeItem, titleMap: Map<string, string>, slugMap: Map<string, string>): PageTreeNode {
+function toPageTreeNode(
+  item: TreeItem,
+  titleMap: Map<string, string>,
+  slugMap: Map<string, string>,
+  translationsMap: Map<string, PageTranslationStatus[]>
+): PageTreeNode {
   const id = String(item.id);
   return {
     id,
     title: titleMap.get(id) || '',
     slug: slugMap.get(id) || '',
-    children: item.children.map(child => toPageTreeNode(child, titleMap, slugMap)),
+    translations: translationsMap.get(id) || [],
+    children: item.children.map(child => toPageTreeNode(child, titleMap, slugMap, translationsMap)),
     collapsed: item.collapsed,
   };
 }
@@ -121,7 +129,12 @@ function isDescendant(items: PageTreeNode[], ancestorId: string, targetId: strin
 }
 
 // Build tree from flattened items
-function buildTreeFromFlattened(flattenedItems: FlattenedItem[], titleMap: Map<string, string>, slugMap: Map<string, string>): PageTreeNode[] {
+function buildTreeFromFlattened(
+  flattenedItems: FlattenedItem[],
+  titleMap: Map<string, string>,
+  slugMap: Map<string, string>,
+  translationsMap: Map<string, PageTranslationStatus[]>
+): PageTreeNode[] {
   const root: TreeItem = { id: 'root', children: [] };
   const nodes: Record<string, TreeItem> = { [root.id]: root };
   const items = flattenedItems.map((item) => ({
@@ -139,7 +152,7 @@ function buildTreeFromFlattened(flattenedItems: FlattenedItem[], titleMap: Map<s
     parent.children.push(nodes[item.id]);
   }
 
-  return root.children.map(item => toPageTreeNode(item, titleMap, slugMap));
+  return root.children.map(item => toPageTreeNode(item, titleMap, slugMap, translationsMap));
 }
 
 // Get projection for drag
@@ -236,6 +249,20 @@ export function SortableTree({
     return map;
   }, [itemsState]);
 
+  const translationsMap = useMemo(() => {
+    const map = new Map<string, PageTranslationStatus[]>();
+    const collectTranslations = (nodes: PageTreeNode[]) => {
+      nodes.forEach(node => {
+        if (node.translations) {
+          map.set(node.id, node.translations);
+        }
+        if (node.children) collectTranslations(node.children);
+      });
+    };
+    collectTranslations(itemsState);
+    return map;
+  }, [itemsState]);
+
   const flattenedItems = useMemo(() => flattenTree(itemsState), [itemsState]);
 
   const projected =
@@ -307,7 +334,7 @@ export function SortableTree({
       const overIndex = flattenedItemsWithProjection.findIndex(({ id }) => id === over.id);
       const sortedItems = arrayMove(flattenedItemsWithProjection, activeIndex, overIndex);
 
-      const newItems = buildTreeFromFlattened(sortedItems, titleMap, slugMap);
+      const newItems = buildTreeFromFlattened(sortedItems, titleMap, slugMap, translationsMap);
       setItemsState(newItems);
       onChange?.(newItems);
     }
@@ -396,6 +423,8 @@ export function SortableTree({
                   collapsed={collapsed}
                   childCount={hasChildren ? node.children!.length : undefined}
                   indicator={overId === id && activeId !== id}
+                  translations={node.translations}
+                  pageSlug={node.slug}
                   onCollapse={
                     collapsible && hasChildren
                       ? () => handleCollapse(id)
