@@ -4,16 +4,11 @@ import { Button, IconButton } from "@measured/puck";
 import { Home, LogOut, PanelLeft, Plus } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/actions";
+import { useAdminLayout } from "@/app/admin/(dashboard)/admin-layout-context";
 
 export function AdminHeader() {
   const pathname = usePathname();
-
-  const toggleSidebar = () => {
-    const sidebar = document.querySelector("[data-sidebar]") as HTMLElement;
-    if (sidebar) {
-      sidebar.classList.toggle("-translate-x-full");
-    }
-  };
+  const { sidebarVisible, toggleSidebar } = useAdminLayout();
 
   return (
     <header
@@ -30,17 +25,17 @@ export function AdminHeader() {
         style={{
           alignItems: "end",
           display: "grid",
-          gap: "16px",
+          gap: "var(--puck-space-px)",
           gridTemplateAreas: '"left middle right"',
           gridTemplateColumns: "1fr auto 1fr",
           gridTemplateRows: "auto",
-          padding: "16px"
+          padding: "var(--puck-space-px)"
         }}
       >
         {/* Left side - Toggle buttons (always visible like Puck) */}
         <div
           style={{
-            color: "var(--puck-color-grey-05)",
+            color: sidebarVisible ? "var(--puck-color-black)" : "var(--puck-color-grey-05)",
             display: "flex",
             marginInlineStart: "-4px",
             paddingTop: "2px"
@@ -63,7 +58,7 @@ export function AdminHeader() {
             color: "var(--puck-color-black)",
             fontWeight: 700,
             margin: 0,
-            fontSize: "16px"
+            fontSize: "var(--puck-font-size-xs)"
           }}
         >
           {pathname?.replace("/admin", "") || "Dashboard"}

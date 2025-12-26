@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
+import { useAdminLayout } from "@/app/admin/(dashboard)/admin-layout-context";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -20,6 +21,7 @@ const navigation = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const { sidebarVisible } = useAdminLayout();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -34,9 +36,11 @@ export function AdminSidebar() {
 
       <aside
         data-sidebar
+        data-sidebar-visible={sidebarVisible}
         className={cn(
           "fixed top-0 left-0 z-50 h-screen w-64 transition-transform duration-300 ease-in-out lg:static lg:translate-x-0 flex-shrink-0",
-          mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          !sidebarVisible && "-translate-x-full lg:translate-x-0 lg:w-0 lg:overflow-hidden",
+          mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}
         style={{
           position: "relative",
@@ -45,7 +49,8 @@ export function AdminSidebar() {
           overflowY: "auto",
           background: "var(--puck-color-grey-12)",
           borderInlineEnd: "1px solid var(--puck-color-grey-09)",
-          gridArea: "left"
+          gridArea: "left",
+          transition: "width 150ms ease-in"
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
@@ -56,11 +61,11 @@ export function AdminSidebar() {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              padding: "16px",
+              padding: "var(--puck-space-px)",
               borderBottom: "1px solid var(--puck-color-grey-09)"
             }}
           >
-            <span style={{ fontSize: "18px", fontWeight: 600, color: "var(--puck-color-black)" }}>
+            <span style={{ fontSize: "var(--puck-font-size-s)", fontWeight: 600, color: "var(--puck-color-black)" }}>
               Menu
             </span>
             <IconButton
@@ -77,7 +82,7 @@ export function AdminSidebar() {
             className="hidden lg:flex"
             style={{
               alignItems: "center",
-              padding: "16px",
+              padding: "var(--puck-space-px)",
               borderBottom: "1px solid var(--puck-color-grey-09)"
             }}
           >
@@ -87,7 +92,7 @@ export function AdminSidebar() {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                fontSize: "18px",
+                fontSize: "var(--puck-font-size-s)",
                 fontWeight: 700,
                 color: "var(--puck-color-black)",
                 textDecoration: "none"
@@ -98,7 +103,7 @@ export function AdminSidebar() {
           </div>
 
           {/* Navigation */}
-          <nav style={{ flex: 1, overflowY: "auto", padding: "12px" }}>
+          <nav style={{ flex: 1, overflowY: "auto", padding: "calc(var(--puck-space-px) * 0.75)" }}>
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
@@ -143,8 +148,8 @@ export function AdminSidebar() {
           </nav>
 
           {/* Footer */}
-          <div style={{ padding: "16px", borderTop: "1px solid var(--puck-color-grey-09)" }}>
-            <p style={{ fontSize: "14px", color: "var(--puck-color-grey-05)", textAlign: "center" }}>
+          <div style={{ padding: "var(--puck-space-px)", borderTop: "1px solid var(--puck-color-grey-09)" }}>
+            <p style={{ fontSize: "var(--puck-font-size-xxs)", color: "var(--puck-color-grey-05)", textAlign: "center" }}>
               © 2025 Pucked
             </p>
           </div>
