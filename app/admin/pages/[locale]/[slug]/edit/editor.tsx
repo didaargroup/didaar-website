@@ -67,7 +67,6 @@ export default function Editor({
         config={config}
         data={initialContent}
         onPublish={handlePublish}
-        isPublishing={isPending}
       />
       {state.errors && "_form" in state.errors && (
         <div className="fixed bottom-4 right-4 p-4 rounded-lg bg-destructive/10 border border-destructive/20">

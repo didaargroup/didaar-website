@@ -1,24 +1,23 @@
 import { requireAuth } from "@/lib/route-guard";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
+import { AdminHeader } from "@/components/admin/admin-header";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  // Protect all admin routes - require authentication and accepted invitation
   await requireAuth({ requireInvitation: true });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="flex h-screen overflow-hidden bg-background">
       <AdminSidebar />
-
-      {/* Main Content */}
-      <main className="lg:pl-64">
-        <div className="min-h-screen">
+      <div className="flex flex-col flex-1 overflow-hidden">
+        <AdminHeader />
+        <main className="flex-1 overflow-auto p-6">
           {children}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

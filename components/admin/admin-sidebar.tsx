@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { IconButton } from "@measured/puck";
 import {
   LayoutDashboard,
   FileText,
   Settings,
-  Menu,
   X,
 } from "lucide-react";
 import { useState } from "react";
@@ -25,22 +24,6 @@ export function AdminSidebar() {
 
   return (
     <>
-      {/* Mobile menu button */}
-      <div className="lg:hidden fixed top-4 left-4 z-50">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="bg-background"
-        >
-          {mobileMenuOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <Menu className="h-5 w-5" />
-          )}
-        </Button>
-      </div>
-
       {/* Mobile overlay */}
       {mobileMenuOpen && (
         <div
@@ -49,24 +32,35 @@ export function AdminSidebar() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
+        data-sidebar
         className={cn(
-          "fixed top-0 left-0 z-40 h-screen w-64 bg-card border-r border-border transition-transform duration-300 ease-in-out",
-          "lg:translate-x-0",
+          "fixed top-0 left-0 z-50 h-screen w-64 bg-background border-r border-border transition-transform duration-300 ease-in-out lg:static lg:translate-x-0",
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex flex-col h-full">
-          {/* Logo/Brand */}
-          <div className="flex items-center h-16 px-6 border-b border-border">
+          {/* Mobile close button */}
+          <div className="flex items-center justify-between h-16 px-4 border-b border-border lg:hidden">
+            <span className="text-lg font-semibold text-foreground">Menu</span>
+            <IconButton
+              type="button"
+              title="Close menu"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              <X focusable="false" />
+            </IconButton>
+          </div>
+
+          {/* Logo/Brand - Desktop only */}
+          <div className="hidden lg:flex items-center h-16 px-6 border-b border-border">
             <Link href="/admin" className="flex items-center space-x-2">
               <span className="text-xl font-bold text-foreground">Pucked</span>
             </Link>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+          <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-1">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               const Icon = item.icon;
@@ -77,7 +71,7 @@ export function AdminSidebar() {
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors w-full",
                     isActive
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"

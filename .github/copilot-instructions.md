@@ -14,6 +14,13 @@ This document guides AI coding agents working on the Pucked codebase - a bilingu
 
 **Tech Stack**: Next.js 16.1.1, React 19.2.3, Turso, Drizzle ORM, Arctic (OAuth), next-intl, Tailwind CSS v4, TypeScript (strict mode)
 
+**Documentation**:
+- `docs/PUCK_COMPONENTS_GUIDE.md` - **Comprehensive guide for using @measured/puck components in admin area**
+- `docs/UI_GUIDELINES.md` - UI patterns, styling conventions, and design system standards
+- `docs/SERVER_ACTIONS_GUIDE.md` - Server action patterns
+- `docs/INVITATION_SYSTEM.md` - Complete auth flow documentation
+- `DATABASE_SETUP.md` - Database documentation
+
 ## Critical Architecture Patterns
 
 ### Authentication Flow (Invitation-Based)
@@ -278,6 +285,12 @@ export function CustomDataForm() {
 - **Admin Area** (`/admin/*`): Uses `@measured/puck` components and styling
 - **Guest/Public Area** (`/app/[locale]/*`): Uses Shadcn UI components
 
+**📖 IMPORTANT**: For detailed information about using Puck components in the admin area, see `docs/PUCK_COMPONENTS_GUIDE.md`. This guide includes:
+- Complete API documentation for all Puck components (ActionBar, Button, Drawer, IconButton, etc.)
+- Common patterns and usage examples
+- Common pitfalls and how to avoid them
+- Design system integration with Tailwind CSS
+
 ### Core Principles (Both Systems)
 
 1. **NEVER use inline styles** - Always use Tailwind utility classes
@@ -289,28 +302,34 @@ export function CustomDataForm() {
 
 **Location**: All files in `app/admin/` directory
 
-**Component Library**: `@measured/puck`
+**Component Library**: `@measured/puck` version 0.20.2
 - Import directly from `@measured/puck`
 - Uses Puck's design system for consistency with the page editor
 
+**📖 See `docs/PUCK_COMPONENTS_GUIDE.md` for complete documentation**
+
 **Available Puck Components**:
-- **Button** - Primary and secondary variants with loading states
-- **IconButton** - Icon-only buttons with tooltip support
-- **ActionBar** - Action bar with Action, Label, and Group sub-components
-- **Drawer** - Collapsible drawer with Item sub-component
+- **ActionBar** - Action bar with label and action buttons
+- **Button** - Primary and secondary button variants (supports href, onClick, icon, fullWidth, loading)
+- **IconButton** - Icon-only buttons with tooltip support (requires title prop)
+- **Drawer** - Collapsible drawer for navigation
 - **DropZone** - Drop zone for drag-and-drop content
 - **FieldLabel** - Labels for form fields with optional icons
 - **AutoField** - Auto-rendering field component
+- **Label** - Text label component
 
 **Standard Pattern**:
 ```tsx
-import { Button } from "@measured/puck"
+import { Button, ActionBar, IconButton } from "@measured/puck"
 
 export function AdminPage() {
   return (
     <div className="admin-container">
-      <Button variant="primary">Save</Button>
-      <Button variant="secondary">Cancel</Button>
+      <ActionBar label="Actions">
+        <ActionBar.Action onClick={() => {}}>
+          <Button variant="primary">Save</Button>
+        </ActionBar.Action>
+      </ActionBar>
     </div>
   )
 }
@@ -320,11 +339,18 @@ export function AdminPage() {
 - ✅ All admin pages, forms, and UI elements
 - ✅ Admin dashboard, page management, settings
 - ✅ Any UI within `/admin/*` routes
-- ✅ Use Button for all actions (primary, secondary, icon buttons)
+- ✅ Use Button for all actions (primary, secondary, with icons, links)
 - ✅ Use ActionBar for action bars with multiple actions
-- ✅ Use Drawer for collapsible sections
+- ✅ Use IconButton for icon-only buttons (always provide title prop)
+- ✅ Use Drawer for navigation menus
 
-**Note**: Puck does NOT export Input, Label, or Card components. For form inputs and cards in admin area, create custom components using Tailwind classes or use Shadcn components if needed.
+**Important Puck Component Constraints**:
+- ❌ Button does NOT accept `className` prop - use `fullWidth` prop or wrapper div
+- ❌ Button does NOT support `asChild` pattern - use `href` prop for links
+- ❌ ActionBar uses `label` prop, NOT `ActionBar.Label` subcomponent
+- ❌ Drawer.Item `label` expects string, NOT JSX - use plain links for custom navigation
+- ❌ IconButton requires `title` prop for accessibility
+- ❌ Puck component does NOT accept `isPublishing` prop
 
 ### Guest/Public Area - Shadcn UI
 
@@ -455,6 +481,7 @@ npx shadcn@latest add [component-name]
 - `app/actions.ts` - Server actions (submitInvitation, loginWithGitHub, logout, createPageAction)
 
 **Documentation**:
+- `docs/PUCK_COMPONENTS_GUIDE.md` - **Comprehensive guide for using @measured/puck components in admin area**
 - `docs/UI_GUIDELINES.md` - **Comprehensive UI patterns, styling conventions, and design system standards**
 - `docs/SERVER_ACTIONS_GUIDE.md` - Server action patterns
 - `docs/INVITATION_SYSTEM.md` - Complete auth flow documentation

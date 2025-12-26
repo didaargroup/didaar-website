@@ -1,7 +1,7 @@
 "use client"
 
 import { createPageAction } from "@/app/actions"
-import { Button } from "@/components/ui/button"
+import { Button } from "@measured/puck"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -80,9 +80,11 @@ export function CreatePageForm() {
             </div>
           )}
 
-          <Button type="submit" className="w-full">
-            Create Page
-          </Button>
+          <div className="w-full">
+            <Button type="submit" variant="primary" fullWidth>
+              Create Page
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>
