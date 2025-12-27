@@ -2,7 +2,7 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { LocaleLayoutClient } from "@/components/locale-layout-client";
-import { getFlatMenuList } from "@/lib/page-tree";
+import { getMenuTree } from "@/lib/page-tree";
 import { getSiteSettings } from "@/lib/site-settings";
 
 type Props = {
@@ -21,7 +21,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   // Fetch menu data server-side
   const [menuItems, settings] = await Promise.all([
-    getFlatMenuList(locale),
+    getMenuTree(locale),
     getSiteSettings(),
   ]);
 

@@ -3,8 +3,12 @@ import type { ComponentConfig } from "@measured/puck";
 export const GridBlock: ComponentConfig<{
   columns?: 1 | 2 | 3 | 4;
   gap?: number;
+  content: React.ComponentType<any>;
 }> = {
   fields: {
+    content: {
+      type: "slot",
+    },
     columns: {
       type: "select",
       options: [
@@ -21,18 +25,17 @@ export const GridBlock: ComponentConfig<{
   defaultProps: {
     columns: 2,
     gap: 16,
+  content: () => null,
   },
-  render: ({ columns, gap, children }) => {
+  render: ({ columns, gap, content: Content }) => {
     return (
-      <div
+      <Content
+        className="md:grid"
         style={{
-          display: "grid",
           gridTemplateColumns: `repeat(${columns || 2}, 1fr)`,
           gap: `${gap || 16}px`,
         }}
-      >
-        {children}
-      </div>
+      />
     );
   },
 };
