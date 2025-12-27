@@ -49,6 +49,7 @@
   grid-template-columns: auto 1fr auto;
   flex: 1;
   overflow: hidden;
+  min-height: 0;
 }
 
 .adminDashboardMain {

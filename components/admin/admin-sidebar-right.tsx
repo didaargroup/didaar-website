@@ -1,9 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { useAdminLayout } from "@/app/admin/(dashboard)/admin-layout-context";
-import { X } from "lucide-react";
-import { IconButton } from "@measured/puck";
+
 
 export interface AdminSidebarRightProps {
   children: React.ReactNode;
@@ -53,7 +51,7 @@ export function AdminSidebarRight({ children, title = "Properties" }: AdminSideb
           )}
 
           {/* Content */}
-          <div style={{ flex: 1, overflowY: "auto", padding: "16px", minHeight: 0 }}>
+          <div style={{ flex: 1, overflowY: "auto", padding: "16px", minHeight: 0, paddingBottom: "24px" }}>
             {children}
           </div>
         </div>

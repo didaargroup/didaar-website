@@ -76,13 +76,23 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
       >
         <div
           className={cn(
-            "flex items-center gap-2 rounded-lg border bg-card px-3 py-2.5 shadow-sm transition-all duration-200 cursor-pointer",
-            !disableInteraction && "hover:bg-accent/50",
-            isSelected && "border-primary border-2 bg-primary/10 ring-2 ring-primary/20",
-            !isSelected && indicator && !ghost ? "border-primary border-2 bg-primary/5" : "border-border"
+            "flex items-center gap-2 rounded-lg shadow-sm transition-all duration-200 cursor-pointer",
+            !disableInteraction && "hover:bg-muted"
           )}
           ref={ref}
-          style={style}
+          style={{
+            border: "1px solid var(--puck-color-grey-09)",
+            background: isSelected
+              ? "var(--puck-color-grey-10)"
+              : indicator && !ghost
+                ? "var(--puck-color-grey-10)"
+                : "var(--puck-color-white)",
+            padding: "10px 12px",
+            boxShadow: isSelected
+              ? "0 0 0 1px var(--puck-color-grey-10), 0 0 0 3px var(--puck-color-azure-04)"
+              : undefined,
+            ...style
+          }}
           onClick={onClick}
         >
           <Handle {...handleProps} />
@@ -100,22 +110,34 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
               {collapseIcon}
             </Action>
           )}
-          <span className="flex-1 truncate text-sm font-medium text-foreground">{value}</span>
+          <span
+            className="flex-1 truncate"
+            style={{
+              fontSize: "14px",
+              fontWeight: 500,
+              color: "var(--puck-color-black)"
+            }}
+          >
+            {value}
+          </span>
           
           {/* Translation badges */}
-          {!clone && translations && translations.length > 0 && (
+          {!clone && translations && translations.length > 0 && !isSelected && (
             <div className="flex items-center gap-1.5">
               {translations.map((translation) => (
                 <Link
                   key={translation.locale}
                   href={`/admin/pages/${translation.locale}/${pageSlug}/edit`}
                   onClick={(e) => e.stopPropagation()}
-                  className={cn(
-                    "flex items-center justify-center w-7 h-7 rounded-md text-xs font-semibold transition-colors",
-                    translation.published
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
-                      : "bg-muted text-muted-foreground hover:bg-muted/70"
-                  )}
+                  className="flex items-center justify-center w-7 h-7 rounded-md text-xs font-semibold transition-all shadow-sm"
+                  style={{
+                    background: translation.published
+                      ? "var(--puck-color-azure-04)"
+                      : "var(--puck-color-grey-10)",
+                    color: translation.published
+                      ? "var(--puck-color-white)"
+                      : "var(--puck-color-grey-05)"
+                  }}
                   title={`${translation.locale.toUpperCase()} - ${translation.published ? 'Published' : 'Draft'}`}
                 >
                   {translation.locale === 'en' ? 'EN' : 'FA'}
@@ -129,7 +151,9 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
             onRemove();
           }} />}
           {clone && childCount && childCount > 1 ? (
-            <span className="text-xs text-muted-foreground">{childCount}</span>
+            <span style={{ fontSize: "12px", color: "var(--puck-color-grey-07)" }}>
+              {childCount}
+            </span>
           ) : null}
         </div>
       </li>
@@ -148,7 +172,14 @@ interface HandleProps extends HTMLAttributes<HTMLButtonElement> {}
 function Handle({ ...props }: HandleProps) {
   return (
     <button
-      className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground transition-colors shrink-0"
+      className="cursor-grab active:cursor-grabbing transition-colors shrink-0"
+      style={{ color: "var(--puck-color-grey-07)" }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.color = "var(--puck-color-black)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.color = "var(--puck-color-grey-07)";
+      }}
       {...props}
     >
       <GripVertical className="h-4 w-4" />
@@ -159,7 +190,19 @@ function Handle({ ...props }: HandleProps) {
 interface ActionProps extends HTMLAttributes<HTMLButtonElement> {}
 
 function Action({ ...props }: ActionProps) {
-  return <button type="button" {...props} />;
+  return (
+    <button
+      type="button"
+      style={{ color: "var(--puck-color-grey-07)" }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.color = "var(--puck-color-black)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.color = "var(--puck-color-grey-07)";
+      }}
+      {...props}
+    />
+  );
 }
 
 interface RemoveProps extends HTMLAttributes<HTMLButtonElement> {}
@@ -167,7 +210,14 @@ interface RemoveProps extends HTMLAttributes<HTMLButtonElement> {}
 function Remove({ ...props }: RemoveProps) {
   return (
     <button
-      className="shrink-0 text-muted-foreground hover:text-destructive transition-colors"
+      className="shrink-0 transition-colors"
+      style={{ color: "var(--puck-color-grey-07)" }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.color = "var(--puck-color-red-09)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.color = "var(--puck-color-grey-07)";
+      }}
       {...props}
     >
       <Trash2 className="h-4 w-4" />

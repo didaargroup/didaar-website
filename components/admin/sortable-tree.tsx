@@ -423,8 +423,23 @@ export function SortableTree({
               className="relative list-none"
               style={{ paddingLeft: `${indentationWidth * depth}px` }}
             >
-              <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2.5 shadow-sm">
-                <span className="text-sm font-medium text-foreground">{node.title}</span>
+              <div
+                className="flex items-center gap-2 rounded-lg px-3 shadow-sm"
+                style={{
+                  border: "1px solid var(--puck-color-grey-09)",
+                  background: "var(--puck-color-white)",
+                  padding: "10px 12px"
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "14px",
+                    fontWeight: 500,
+                    color: "var(--puck-color-black)"
+                  }}
+                >
+                  {node.title}
+                </span>
               </div>
             </li>
           );

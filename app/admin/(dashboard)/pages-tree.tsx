@@ -84,21 +84,34 @@ export function PagesTree() {
       <div className="w-full max-w-2xl">
         {/* Section header with separator */}
         <div className="flex items-center gap-4 mb-6">
-          <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+          <h2
+            className="uppercase tracking-wider"
+            style={{
+              fontSize: "var(--puck-font-size-xs)",
+              fontWeight: 500,
+              color: "var(--puck-color-grey-07)"
+            }}
+          >
             Page Structure
           </h2>
         
         </div>
 
         {/* Tree container with subtle border and shadow */}
-        <div 
+        <div
           data-pages-order={JSON.stringify(orderData)}
         >
           <SortableTree items={items} onChange={handleChange} />
           
           {/* Save button */}
           {isTainted && (
-            <div className="mt-6 pt-4 border-t flex justify-end">
+            <div
+              className="mt-6 flex justify-end"
+              style={{
+                paddingTop: "var(--puck-space-16)",
+                borderTop: "1px solid var(--puck-color-grey-09)"
+              }}
+            >
               <SavePageOrderButton onSaveSuccess={handleSaveSuccess} />
             </div>
           )}
