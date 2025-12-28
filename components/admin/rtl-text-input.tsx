@@ -64,7 +64,7 @@ const RTLTextInputInner = ({
         dir={initialDirection}
         placeholder={placeholder}
         rows={rows}
-        className="bg-white border border-[var(--puck-color-grey-09)] rounded px-[15px] py-3 text-base w-full max-w-full transition-colors duration-75 focus:border-[var(--puck-color-grey-05)] focus:outline-2 focus:outline-[var(--puck-color-azure-05)] focus:outline-offset-[-2px] hover:border-[var(--puck-color-grey-05)] hover:transition-none focus:transition-none mb-[-4px]"
+        className="bg-white border border-[--puck-color-grey-09] rounded px-[15px] py-3 text-base w-full max-w-full transition-colors duration-75 focus:border-[--puck-color-grey-05] focus:outline-2 focus:outline-[--puck-color-azure-05] focus:outline-offset-[-2px] hover:border-[--puck-color-grey-05] hover:transition-none focus:transition-none mb-[-4px]"
         autoComplete="off"
         title={label || name}
       />

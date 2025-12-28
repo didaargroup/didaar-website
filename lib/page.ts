@@ -1,7 +1,7 @@
 
 import { getDb } from "@/db";
 import { pages, pageTranslations } from "@/db/schema";
-import { eq, and, isNull, sql } from "drizzle-orm";
+import { eq, and, isNull, sql, like } from "drizzle-orm";
 import type { Page, PageTranslation } from "@/db/schema";
 
 export interface PageTranslationStatus {
@@ -123,6 +123,7 @@ export async function getPageByFullPath(fullPath: string) {
   };
 }
 
+
 /**
  * Check if a page is the landing page (singleton "home" page)
  */
@@ -217,14 +218,14 @@ export async function getOrCreateLandingPage() {
 
   if (!page) {
     // Create the landing page if it doesn't exist
-    page = await createPage({
+    page = {...(await createPage({
       title: "Home",
       slug: "home",
       isDraft: false,
       showOnMenu: true,
       parentId: null,
       sortOrder: 0,
-    });
+    })), translations: []};
   }
 
   return page;
@@ -562,7 +563,7 @@ export async function updateFullPathForSlugChange(pageId: number, newSlug: strin
   const descendants = await db
     .select()
     .from(pages)
-    .where(sql`full_path LIKE ${`${oldFullPath}/%`}`);
+    .where(like(pages.fullPath, `${oldFullPath}/%`));
 
   for (const descendant of descendants) {
     const newDescendantPath = descendant.fullPath.replace(
@@ -611,5 +612,6 @@ export async function updateFullPathsForTree(tree: PageTreeNode[]) {
   if (failureCount > 0) {
     throw new Error(`Failed to update ${failureCount} page(s) out of ${pathMap.size}`);
   }
-}
 
+  return { successCount, failureCount };
+}

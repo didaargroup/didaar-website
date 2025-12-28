@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { generateState } from "arctic";
 import { github } from "@/lib/oauth";
 import { cookies } from "next/headers";
-import { deleteSessionTokenCookie, getCurrentSession, invalidateSession } from "@/lib/session";
+import { getCurrentSession } from "@/lib/session";
 import { getInvitationByCode, isInvitationValid, useInvitation } from "@/lib/invitation";
 import { acceptInvitationForUser } from "@/lib/users";
 import { tryCatch } from "@/lib/utils";
@@ -38,17 +38,6 @@ type FormState = {
 }
 
 const db = getDb();
-
-export async function logout() {
-	const { session } = await getCurrentSession();
-	if (!session) {
-		return;
-	}
-
-	await invalidateSession(session.id);
-	await deleteSessionTokenCookie();
-	redirect("/login");
-}
 
 export async function loginWithGitHub(redirectTo?: string) {
 	const state = generateState();

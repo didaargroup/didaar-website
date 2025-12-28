@@ -3,7 +3,7 @@
 import { Button, IconButton } from "@measured/puck";
 import { Home, LogOut, PanelLeft, PanelRight, Plus } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { logout } from "@/app/actions";
+import { logout } from "@/app/actions/auth";
 import { useAdminLayout } from "@/app/admin/(dashboard)/admin-layout-context";
 
 export function AdminHeader() {
