@@ -3,7 +3,6 @@ import type { ComponentConfig } from "@measured/puck";
 export const GridBlock: ComponentConfig<{
   columns?: 1 | 2 | 3 | 4;
   gap?: number;
-  content: React.ComponentType<any>;
 }> = {
   fields: {
     content: {
@@ -25,13 +24,12 @@ export const GridBlock: ComponentConfig<{
   defaultProps: {
     columns: 2,
     gap: 16,
-  content: () => null,
   },
   render: ({ columns, gap, content: Content }) => {
     return (
       <Content
-        className="md:grid"
         style={{
+          display: "grid",
           gridTemplateColumns: `repeat(${columns || 2}, 1fr)`,
           gap: `${gap || 16}px`,
         }}

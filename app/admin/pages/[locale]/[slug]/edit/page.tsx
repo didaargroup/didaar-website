@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/route-guard";
-import { getPageBySlug, getPageContent } from "@/lib/page";
+import { getPageBySlug, getPageContent, getPagesTree } from "@/lib/page";
 import { notFound } from "next/navigation";
 import Editor from "./editor";
 
@@ -26,6 +26,9 @@ export default async function EditorPage({ params }: EditorPageProps) {
   // Get page content for the specific locale
   const pageContent = await getPageContent(page.id, locale);
 
+  // Get all pages for the internal link selector
+  const pagesTree = await getPagesTree();
+
   return (
     <Editor
       pageId={page.id}
@@ -34,6 +37,7 @@ export default async function EditorPage({ params }: EditorPageProps) {
       initialContent={pageContent.content}
       initialPublished={pageContent.published}
       initialIsDraft={page.isDraft}
+      pagesTree={pagesTree}
     />
   );
 }

@@ -3,6 +3,8 @@
 import type { ComponentConfig } from "@measured/puck";
 import { Image as ImageIcon } from "lucide-react";
 import { ImageField } from "./image-field";
+import { getTextDirection } from "@/lib/text-direction";
+import { RTLTextInput } from "./rtl-text-input";
 
 export interface ImageBlockProps {
   url?: string;
@@ -30,8 +32,18 @@ export const ImageBlock: ComponentConfig<ImageBlockProps> = {
       label: "Alt Text",
     },
     caption: {
-      type: "text",
+      type: "custom",
       label: "Caption (optional)",
+      render: ({ name, value, onChange }) => {
+        return (
+          <RTLTextInput
+            name={name}
+            value={value || ""}
+            onChange={onChange}
+            placeholder="Enter caption..."
+          />
+        );
+      },
     },
     width: {
       type: "number",
@@ -94,6 +106,7 @@ export const ImageBlock: ComponentConfig<ImageBlockProps> = {
 
     const { src, srcSet } = getResponsiveSrc(url, width);
     const sizes = '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw';
+    const captionDir = caption ? getTextDirection(caption) : undefined;
 
     return (
       <figure className="my-4">
@@ -113,7 +126,10 @@ export const ImageBlock: ComponentConfig<ImageBlockProps> = {
           loading="lazy"
         />
         {caption && (
-          <figcaption className="text-xs text-center text-muted-foreground mt-2">
+          <figcaption 
+            className="text-xs text-center text-muted-foreground mt-2"
+            dir={captionDir}
+          >
             {caption}
           </figcaption>
         )}

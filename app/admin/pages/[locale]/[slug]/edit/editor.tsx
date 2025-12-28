@@ -9,6 +9,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import type { ComponentProps, RootProps } from "@/types/puck";
+import type { PageTreeNode } from "@/lib/page";
+import { PageTreeProvider } from "@/contexts/page-tree-context";
 
 type EditorProps = {
   pageId: number;
@@ -17,6 +19,7 @@ type EditorProps = {
   initialContent: any;
   initialPublished: boolean;
   initialIsDraft: boolean;
+  pagesTree: PageTreeNode[];
 };
 
 type FormState = {
@@ -40,6 +43,7 @@ export default function Editor({
   initialContent,
   initialPublished,
   initialIsDraft,
+  pagesTree,
 }: EditorProps) {
   const boundAction = savePageContent.bind(null, pageId, locale) as (prevState: FormState, formData: FormData) => Promise<FormState>;
   const [state, formAction] = useActionState(boundAction, initialState);
@@ -119,46 +123,48 @@ export default function Editor({
   const config = getConfig(locale, true);
 
   return (
-    <div className="h-screen" suppressHydrationWarning>
-      <Puck
-        config={config}
-        data={data}
-        onPublish={handlePublish}
-        onChange={(newData) => setData(newData)}
-        overrides={{
-          headerActions: ({ children }) =>
-            <div className="flex items-center gap-3">
-              <Link
-                href="/admin"
-                className="flex items-center text-sm font-medium hover:text-primary transition-colors"
-              >
-                Dashboard
-              </Link>
-              {children}
-              <Button
-                variant="secondary"
-                icon={<LogOut style={{ width: "14px", height: "14px" }} />}
-                onClick={logout}
-              >
-                Logout
-              </Button>
-            </div>,
-        }}
-      />
-      {state.errors && ("_form" in state.errors || "title" in state.errors) && (
-        <div className="fixed bottom-4 right-4 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
-          <p className="text-sm text-destructive">
-            {state.errors._form?.[0] || state.errors.title?.[0] || "Validation failed"}
-          </p>
-        </div>
-      )}
-      {state.success && (
-        <div className="fixed bottom-4 right-4 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-          <p className="text-sm text-green-600 dark:text-green-400">
-            Page saved successfully!
-          </p>
-        </div>
-      )}
-    </div>
+    <PageTreeProvider initialTree={pagesTree}>
+      <div className="h-screen" suppressHydrationWarning>
+        <Puck
+          config={config}
+          data={data}
+          onPublish={handlePublish}
+          onChange={(newData) => setData(newData)}
+          overrides={{
+            headerActions: ({ children }) =>
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/admin"
+                  className="flex items-center text-sm font-medium hover:text-primary transition-colors"
+                >
+                  Dashboard
+                </Link>
+                {children}
+                <Button
+                  variant="secondary"
+                  icon={<LogOut style={{ width: "14px", height: "14px" }} />}
+                  onClick={logout}
+                >
+                  Logout
+                </Button>
+              </div>,
+          }}
+        />
+        {state.errors && ("_form" in state.errors || "title" in state.errors) && (
+          <div className="fixed bottom-4 right-4 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+            <p className="text-sm text-destructive">
+              {state.errors._form?.[0] || state.errors.title?.[0] || "Validation failed"}
+            </p>
+          </div>
+        )}
+        {state.success && (
+          <div className="fixed bottom-4 right-4 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+            <p className="text-sm text-green-600 dark:text-green-400">
+              Page saved successfully!
+            </p>
+          </div>
+        )}
+      </div>
+    </PageTreeProvider>
   );
 }

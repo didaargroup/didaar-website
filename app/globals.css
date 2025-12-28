@@ -305,3 +305,187 @@
 .dark .hljs-addition {
   background: oklch(0.3 0.05 140);
 }
+
+/* TipTap Editor Styles */
+.ProseMirror {
+  min-height: 150px;
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  height: 0;
+}
+
+[dir="rtl"] .ProseMirror p.is-editor-empty:first-child::before {
+  float: right;
+}
+
+.ProseMirror h1,
+.ProseMirror h2,
+.ProseMirror h3,
+.ProseMirror h4,
+.ProseMirror h5,
+.ProseMirror h6 {
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.ProseMirror h1 {
+  font-size: 2.25rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.ProseMirror h2 {
+  font-size: 1.875rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.875rem;
+}
+
+.ProseMirror h3 {
+  font-size: 1.5rem;
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.ProseMirror h4 {
+  font-size: 1.25rem;
+  margin-top: 0.875rem;
+  margin-bottom: 0.625rem;
+}
+
+.ProseMirror h5 {
+  font-size: 1.125rem;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.ProseMirror h6 {
+  font-size: 1rem;
+  margin-top: 0.625rem;
+  margin-bottom: 0.5rem;
+}
+
+.ProseMirror code {
+  background-color: hsl(var(--muted));
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  font-size: 0.875em;
+  font-family: var(--font-mono);
+}
+
+.ProseMirror pre {
+  background-color: hsl(var(--muted));
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin: 1rem 0;
+  overflow-x: auto;
+}
+
+.ProseMirror pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.ProseMirror blockquote {
+  border-left: 3px solid hsl(var(--primary));
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: hsl(var(--muted-foreground));
+}
+
+[dir="rtl"] .ProseMirror blockquote {
+  border-left: none;
+  border-right: 3px solid hsl(var(--primary));
+  padding-left: 0;
+  padding-right: 1rem;
+}
+
+.ProseMirror hr {
+  border: none;
+  border-top: 2px solid hsl(var(--border));
+  margin: 2rem 0;
+}
+
+.ProseMirror ul,
+.ProseMirror ol {
+  padding: 0.5rem 0;
+}
+
+[dir="ltr"] .ProseMirror ul,
+[dir="ltr"] .ProseMirror ol {
+  padding-left: 1.5rem;
+}
+
+[dir="rtl"] .ProseMirror ul,
+[dir="rtl"] .ProseMirror ol {
+  padding-right: 1.5rem;
+}
+
+.ProseMirror li {
+  margin: 0.25rem 0;
+}
+
+.ProseMirror a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ProseMirror a:hover {
+  color: hsl(var(--primary) / 0.8);
+}
+
+/* RTL-specific list styling */
+[dir="rtl"] .ProseMirror ul {
+  list-style-type: disc;
+}
+
+[dir="rtl"] .ProseMirror ol {
+  list-style-type: decimal;
+}
+
+/* Ensure proper text alignment in RTL */
+[dir="rtl"] .ProseMirror {
+  text-align: right;
+}
+
+[dir="ltr"] .ProseMirror {
+  text-align: left;
+}
+
+/* RTL/LTR text input styling */
+input[dir="rtl"],
+textarea[dir="rtl"] {
+  text-align: right;
+}
+
+input[dir="ltr"],
+textarea[dir="ltr"] {
+  text-align: left;
+}
+
+/* Smooth transition for direction changes */
+input,
+textarea,
+.ProseMirror {
+  transition: direction 0.2s ease, text-align 0.2s ease;
+}
+
+/* RTL-specific placeholder alignment */
+input[dir="rtl"]::placeholder,
+textarea[dir="rtl"]::placeholder {
+  text-align: right;
+}
+
+input[dir="ltr"]::placeholder,
+textarea[dir="ltr"]::placeholder {
+  text-align: left;
+}

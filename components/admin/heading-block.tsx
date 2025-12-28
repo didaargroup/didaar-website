@@ -1,11 +1,26 @@
 import type { ComponentConfig } from "@measured/puck";
+import { getTextDirection } from "@/lib/text-direction";
+import { RTLTextInput } from "./rtl-text-input";
 
 export const HeadingBlock: ComponentConfig<{
   title: string;
   level?: 1 | 2 | 3 | 4 | 5 | 6;
 }> = {
   fields: {
-    title: { type: "text" },
+    title: {
+      type: "custom",
+      render: ({ name, value, onChange }) => {
+        return (
+          <RTLTextInput
+            name={name}
+            value={value || ""}
+            onChange={onChange}
+            label="Heading Text"
+            placeholder="Enter heading..."
+          />
+        );
+      },
+    },
     level: {
       type: "select",
       options: [
@@ -24,6 +39,7 @@ export const HeadingBlock: ComponentConfig<{
   },
   render: ({ title, level }) => {
     const Tag = `h${level || 2}` as keyof JSX.IntrinsicElements;
-    return <Tag>{title}</Tag>;
+    const dir = getTextDirection(title);
+    return <Tag dir={dir}>{title}</Tag>;
   },
 };
