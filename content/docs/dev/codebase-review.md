@@ -82,7 +82,7 @@ The authentication system uses GitHub OAuth with an invitation-based signup flow
 
 ### 2.2 Authentication Flow
 
-```
+```md
 ┌─────────────────┐
 │ 1. User visits  │
 │    /login       │
