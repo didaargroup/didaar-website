@@ -4,26 +4,42 @@ import { Button, IconButton } from "@measured/puck";
 import { LogOut, PanelLeft, PanelRight } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { logout } from "@/app/actions/auth";
-import { isButtonAction, useAdminLayout } from "@/app/admin/(dashboard)/admin-layout-context";
+import {
+  isButtonAction,
+  useAdminLayout,
+} from "@/app/admin/(dashboard)/admin-layout-context";
 import { HeaderAction } from "@/types";
 import { useEffect, useMemo } from "react";
 
 export function AdminHeader() {
   const pathname = usePathname();
 
-
   const title = useMemo(() => {
     if (!pathname) return "Dashboard";
 
-    const pathWithoutAdmin = pathname.replace("/admin", "")
+    const pathWithoutAdmin = pathname.replace("/admin", "");
     const segments = pathWithoutAdmin.split("/").filter(Boolean);
 
     if (segments.length === 0) return "Dashboard";
 
-    return segments[segments.length - 1].split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
-  }, [pathname])
+    return segments[segments.length - 1]
+      .split("-")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  }, [pathname]);
 
-  const { sidebarLeftVisible, toggleSidebarLeft, sidebarRightVisible, toggleSidebarRight, isLoading, setIsLoading, toggleLoading, actions, setActions } = useAdminLayout();
+  const {
+    sidebarLeftVisible,
+    toggleSidebarLeft,
+    sidebarRightVisible,
+    toggleSidebarRight,
+    actions,
+    setActions,
+    hasDirtyForm,
+    hasErrors,
+    submitAll,
+    isSubmitting
+  } = useAdminLayout();
 
   // Default actions
   useEffect(() => {
@@ -32,8 +48,8 @@ export function AdminHeader() {
         label: "Logout",
         icon: <LogOut className="w-3.5 h-3.5" />,
         onClick: logout,
-      }
-    ])
+      },
+    ]);
   }, [setActions]);
 
   return (
@@ -41,7 +57,13 @@ export function AdminHeader() {
       <div className="grid items-end gap-(--puck-space-px) grid-areas-[left_middle_right] grid-cols-[1fr_auto_1fr] grid-rows-auto p-(--puck-space-px)">
         {/* Left side - Toggle buttons (always visible like Puck) */}
         <div className="flex -ms-1 pt-0.5">
-          <div className={sidebarLeftVisible ? "text-gray-900 dark:text-gray-100" : "text-gray-400 dark:text-gray-600"}>
+          <div
+            className={
+              sidebarLeftVisible
+                ? "text-gray-900 dark:text-gray-100"
+                : "text-gray-400 dark:text-gray-600"
+            }
+          >
             <IconButton
               type="button"
               title="Toggle left sidebar"
@@ -50,7 +72,13 @@ export function AdminHeader() {
               <PanelLeft focusable="false" />
             </IconButton>
           </div>
-          <div className={sidebarRightVisible ? "text-gray-900 dark:text-gray-100" : "text-gray-400 dark:text-gray-600"}>
+          <div
+            className={
+              sidebarRightVisible
+                ? "text-gray-900 dark:text-gray-100"
+                : "text-gray-400 dark:text-gray-600"
+            }
+          >
             <IconButton
               type="button"
               title="Toggle right sidebar"
@@ -69,9 +97,18 @@ export function AdminHeader() {
 
         {/* Right side - Actions */}
         <div className="flex gap-4 justify-end items-center">
-          {actions.map((action, index) =>
-            <HeaderActionItem key={index} action={action} />
+          {hasDirtyForm && (
+            <Button
+              variant="primary"
+              onClick={submitAll}
+              disabled={isSubmitting || hasErrors}
+            >
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
           )}
+          {actions.map((action, index) => (
+            <HeaderActionItem key={index} action={action} />
+          ))}
         </div>
       </div>
     </header>
@@ -79,7 +116,6 @@ export function AdminHeader() {
 }
 
 function HeaderActionItem({ action }: { action: HeaderAction }) {
-
   const actionType = useMemo(() => {
     if (typeof action !== "object" && action !== null) {
       return null;
@@ -106,6 +142,6 @@ function HeaderActionItem({ action }: { action: HeaderAction }) {
       >
         {action.label}
       </Button>
-    )
+    );
   }
 }

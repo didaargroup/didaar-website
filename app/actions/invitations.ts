@@ -5,7 +5,8 @@ import { getCurrentSession } from "@/lib/session";
 import { acceptInvitationForUser } from "@/lib/users";
 import { redirect } from "next/navigation";
 import z from "zod";
-import { FormResults, InvitationStatus, validateInvitationCodeSchema } from "./types";
+import { validateInvitationCodeSchema } from "./fields-schema";
+import { FormResults, InvitationStatus } from "../../types/actions";
 import { tryCatch } from "@/lib/utils";
 
 /**

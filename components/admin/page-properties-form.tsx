@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useState, useRef } from "react";
 import { Button } from "@measured/puck";
 import { Trash2 } from "lucide-react";
 import { updatePageAction, deletePageAction } from "@/app/actions";
@@ -8,24 +8,24 @@ import { Page } from "@/db/schema";
 import { useNotifications } from "@/contexts/notification-context";
 import { usePageTree } from "@/contexts/page-tree-context";
 import { usePageSelection } from "@/components/admin/page-selection-context";
-import { cn } from "@/lib/utils";
+import { useFormRegistry } from "./use-form-registry";
 
 interface PagePropertiesFormProps {
   page: Page;
 }
 
-type FormState = {
-  success?: boolean;
-  updatedPage?: Page;
-  errors?: {
-    _form?: string[];
-    [key: string]: any;
-  };
-};
 
-const initialState: FormState = {
-  success: false,
-  errors: {}
+const initialState = {
+  success: undefined as string | undefined,
+  errors: undefined as {
+    formErrors?: string[];
+    fieldErrors?: {
+      title?: string[];
+      slug?: string[];
+      isDraft?: string[];
+      showOnMenu?: string[];
+    };
+  } | undefined
 };
 
 export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
@@ -35,6 +35,35 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
   const { updatePageInTree, removePageFromTree } = usePageTree();
   const { setSelectedPage, clearSelection } = usePageSelection();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const [isDirty, setIsDirty] = useState(false);
+
+  const formRef = useRef<HTMLFormElement>(null);
+  
+  useFormRegistry<{
+    title?: string;
+    slug?: string;
+    isDraft?: boolean;
+    showOnMenu?: boolean;
+  }>({
+    formId: `page-properties-${page.id}`,
+    isDirty,
+    isValid: !state.errors?.formErrors && !state.errors?.fieldErrors,
+    errors: state.errors || {},
+    submit: async () => {
+      // Trigger native form submission
+      formRef.current?.requestSubmit();
+    },
+  })
+
+  // Reset dirty state after successful submission
+  useEffect(() => {
+    if (state.success) {
+      setIsDirty(false);
+    }
+  }, [state.success]);
+
+
 
   // Handle successful update
   useEffect(() => {
@@ -57,22 +86,17 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
 
   // Handle form errors
   useEffect(() => {
-    if (state.errors && Object.keys(state.errors).length > 0) {
-      // Only show notification for form-level errors, not field errors
-      if (state.errors._form) {
-        showError(state.errors._form[0] || "Failed to update page");
-      }
+    if (state.errors?.formErrors && state.errors.formErrors.length > 0) {
+      showError(state.errors.formErrors[0]);
     }
-  }, [state.errors, showError]);
+  }, [state.errors?.formErrors, showError]);
 
   // Handle delete errors
   useEffect(() => {
-    if (deleteState.errors && Object.keys(deleteState.errors).length > 0) {
-      if (deleteState.errors._form) {
-        showError(deleteState.errors._form[0] || "Failed to delete page");
-      }
+    if (deleteState.errors?.formErrors && deleteState.errors.formErrors.length > 0) {
+      showError(deleteState.errors.formErrors[0]);
     }
-  }, [deleteState.errors, showError]);
+  }, [deleteState.errors?.formErrors, showError]);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
@@ -102,7 +126,9 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
       </div>
 
       {/* Title Form */}
-      <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      <form action={formAction} style={{ display: "flex", flexDirection: "column", gap: "16px" }} ref={formRef}
+        onChange={() => setIsDirty(true)}
+      >
         <input type="hidden" name="pageId" value={page.id} />
 
         {/* Title */}
@@ -121,11 +147,16 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
             defaultValue={page.title}
             placeholder="Enter page title"
             required
+            onChange={(e) => {
+              setIsDirty(true);
+              // Update tree title in real-time
+              updatePageInTree({ ...page, title: e.target.value });
+            }}
             style={{
               width: "100%",
               padding: "8px 12px",
               borderRadius: "4px",
-              border: !state.success && state.errors && 'title' in state.errors
+              border: state.errors?.fieldErrors?.title
                 ? "1px solid var(--puck-color-red-09)"
                 : "1px solid var(--puck-color-grey-09)",
               background: "var(--puck-color-white)",
@@ -133,12 +164,12 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
               fontSize: "var(--puck-font-size-xs)",
             }}
           />
-          {!state.success && state.errors && 'title' in state.errors && Array.isArray(state.errors.title) && state.errors.title.length > 0 && (
+          {state.errors?.fieldErrors?.title && (
             <p
               className="text-xs mt-1"
               style={{ fontSize: "var(--puck-font-size-xs)", color: "var(--puck-color-red-07)", marginTop: "4px" }}
             >
-              {state.errors.title[0]}
+              {state.errors.fieldErrors.title[0]}
             </p>
           )}
         </div>
@@ -164,7 +195,7 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
               width: "100%",
               padding: "8px 12px",
               borderRadius: "4px",
-              border: !state.success && state.errors && 'slug' in state.errors
+              border: state.errors?.fieldErrors?.slug
                 ? "1px solid var(--puck-color-red-09)"
                 : "1px solid var(--puck-color-grey-09)",
               background: "var(--puck-color-white)",
@@ -172,12 +203,12 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
               fontSize: "var(--puck-font-size-xs)",
             }}
           />
-          {!state.success && state.errors && 'slug' in state.errors && Array.isArray(state.errors.slug) && state.errors.slug.length > 0 && (
+          {state.errors?.fieldErrors?.slug && (
             <p
               className="text-xs mt-1"
               style={{ fontSize: "var(--puck-font-size-xs)", color: "var(--puck-color-red-07)", marginTop: "4px" }}
             >
-              {state.errors.slug[0]}
+              {state.errors.fieldErrors.slug[0]}
             </p>
           )}
           <p
@@ -202,19 +233,19 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
                 width: "16px",
                 height: "16px",
                 cursor: "pointer",
-                border: !state.success && state.errors && 'isDraft' in state.errors
+                border: state.errors?.fieldErrors?.isDraft
                   ? "1px solid var(--puck-color-red-09)"
                   : "1px solid var(--puck-color-grey-09)",
               }}
             />
             <span>Draft (unpublished)</span>
           </label>
-          {!state.success && state.errors && 'isDraft' in state.errors && Array.isArray(state.errors.isDraft) && state.errors.isDraft.length > 0 && (
+          {state.errors?.fieldErrors?.isDraft && (
             <p
               className="text-xs mt-1"
               style={{ fontSize: "var(--puck-font-size-xs)", color: "var(--puck-color-red-07)", marginTop: "4px", marginLeft: "24px" }}
             >
-              {state.errors.isDraft[0]}
+              {state.errors.fieldErrors.isDraft[0]}
             </p>
           )}
           <p
@@ -239,19 +270,19 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
                 width: "16px",
                 height: "16px",
                 cursor: "pointer",
-                border: !state.success && state.errors && 'showOnMenu' in state.errors
+                border: state.errors?.fieldErrors?.showOnMenu
                   ? "1px solid var(--puck-color-red-09)"
                   : "1px solid var(--puck-color-grey-09)",
               }}
             />
             <span>Show in navigation menu</span>
           </label>
-          {!state.success && state.errors && 'showOnMenu' in state.errors && Array.isArray(state.errors.showOnMenu) && state.errors.showOnMenu.length > 0 && (
+          {state.errors?.fieldErrors?.showOnMenu && (
             <p
               className="text-xs mt-1"
               style={{ fontSize: "var(--puck-font-size-xs)", color: "var(--puck-color-red-07)", marginTop: "4px", marginLeft: "24px" }}
             >
-              {state.errors.showOnMenu[0]}
+              {state.errors.fieldErrors.showOnMenu[0]}
             </p>
           )}
           <p
@@ -263,7 +294,7 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
         </div>
 
         {/* Form-level error */}
-        {!state.success && state.errors && '_form' in state.errors && Array.isArray(state.errors._form) && state.errors._form.length > 0 && (
+        {state.errors?.formErrors && state.errors.formErrors.length > 0 && (
           <div
             className="p-3 rounded-lg"
             style={{
@@ -277,7 +308,7 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
               className="text-xs"
               style={{ fontSize: "var(--puck-font-size-xs)", color: "var(--puck-color-red-07)" }}
             >
-              {state.errors._form[0]}
+              {state.errors.formErrors[0]}
             </p>
           </div>
         )}
@@ -294,7 +325,7 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
       <form action={deleteFormAction} style={{ marginTop: "16px" }}>
         <input type="hidden" name="pageId" value={page.id} />
 
-        {!deleteState.success && deleteState.errors && '_form' in deleteState.errors && Array.isArray(deleteState.errors._form) && deleteState.errors._form.length > 0 && (
+        {deleteState.errors?.formErrors && deleteState.errors.formErrors.length > 0 && (
           <div
             className="p-3 rounded-lg mb-2"
             style={{
@@ -309,7 +340,7 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
               className="text-xs"
               style={{ fontSize: "var(--puck-font-size-xs)", color: "var(--puck-color-red-07)" }}
             >
-              {deleteState.errors._form[0]}
+              {deleteState.errors.formErrors[0]}
             </p>
           </div>
         )}
