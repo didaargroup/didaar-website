@@ -79,10 +79,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
   );
 
   const submitAll = useCallback(async () => {
-    const dirtyForms = Array.from(forms.values()).filter((f) => {
-      const isDirty = typeof f.isDirty === 'function' ? f.isDirty() : f.isDirty;
-      return isDirty;
-    });
+    const dirtyForms = Array.from(forms.values()).filter((f) => f.isDirty);
 
     if (dirtyForms.length === 0) return;
 
@@ -92,9 +89,8 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
     try {
       await Promise.allSettled(
         dirtyForms.map(async (form) => {
-          const submitFn = typeof form.submit === 'function' ? form.submit : form.submit;
           const res = await tryCatch(async () => {
-            await submitFn();
+            await form.submit();
           });
 
           if (!res.success) {
@@ -116,14 +112,8 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
 
 
   const hasDirtyForm = useMemo(() => {
-    const dirty = Array.from(forms.values()).some((f) => {
-      const isDirty = typeof f.isDirty === 'function' ? f.isDirty() : f.isDirty;
-      return isDirty;
-    });
-    console.log('[AdminLayout] hasDirtyForm:', dirty, 'forms:', forms.size, 'details:', Array.from(forms.entries()).map(([id, f]) => {
-      const isDirty = typeof f.isDirty === 'function' ? f.isDirty() : f.isDirty;
-      return [id, isDirty];
-    }));
+    const dirty = Array.from(forms.values()).some((f) => f.isDirty);
+    console.log('[AdminLayout] hasDirtyForm:', dirty, 'forms:', forms.size, 'details:', Array.from(forms.entries()).map(([id, f]) => [id, f.isDirty]));
     return dirty;
   }, [forms]);
 
