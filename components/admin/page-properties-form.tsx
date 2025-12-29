@@ -36,8 +36,9 @@ const initialState = {
 };
 
 export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
+  const updatePageWithIdAction = updatePageAction.bind(null, page.id);
   const [state, formAction] = useActionState(
-    updatePageAction as any,
+    updatePageWithIdAction,
     initialState
   );
 
@@ -168,34 +169,7 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
   }, [deleteState.errors?.formErrors, showError]);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
-      {/* Page ID */}
-      <div>
-        <label
-          className="block text-xs font-medium mb-1"
-          style={{
-            fontSize: "var(--puck-font-size-xs)",
-            color: "var(--puck-color-grey-07)",
-          }}
-        >
-          Page ID
-        </label>
-        <input
-          type="text"
-          value={page.id}
-          disabled
-          style={{
-            width: "100%",
-            padding: "8px 12px",
-            borderRadius: "4px",
-            border: "1px solid var(--puck-color-grey-09)",
-            background: "var(--puck-color-grey-08)",
-            color: "var(--puck-color-grey-07)",
-            fontSize: "var(--puck-font-size-xs)",
-            cursor: "not-allowed",
-          }}
-        />
-      </div>
+    <div className="flex flex-col gap-4">
 
       {/* Title Form */}
       <form
@@ -432,16 +406,6 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
             </p>
           </div>
         )}
-
-        {/* Actions */}
-        <div
-          className="flex gap-2 pt-2"
-          style={{ display: "flex", gap: "8px", paddingTop: "8px" }}
-        >
-          <Button type="submit" variant="primary" fullWidth>
-            Save Changes
-          </Button>
-        </div>
       </form>
 
       {/* Delete Form */}
@@ -458,8 +422,6 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
           Delete Page
         </Button>
       </form>
-
-      {/* Confirmation Dialog */}
 
       {/* Divider */}
       <div

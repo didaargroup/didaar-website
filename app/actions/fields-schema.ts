@@ -19,3 +19,14 @@ export const validateInvitationCodeSchema = z.object({
 	}),
 });
 
+export const updatePageSchema = z.object({
+	title: z.string().min(4).max(200),
+	slug: z.string().min(4).max(200).regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
+	isDraft: z.union([z.string(), z.null()]).optional().transform((val) => val === "on"),
+	showOnMenu: z.union([z.string(), z.null()]).optional().transform((val) => val === "on"),
+});
+
+export const pageContentSchema = z.object({
+	title: z.string().min(1).max(200),
+	content: z.any().optional().nullable(),
+});
