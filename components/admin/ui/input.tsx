@@ -19,10 +19,10 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         // Disabled state
         "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
         // Select element specific
-  
+        "max-w-lg",
         className
       )}
-      {...props}
+      {...props} 
     />
   )
 }

@@ -37,7 +37,7 @@ export function CreatePageForm() {
           </HeadingSection>
         }
       >
-        <div className="flex justify-end">
+        <div className="">
           <Input
             placeholder="Page Title"
             name="title"
