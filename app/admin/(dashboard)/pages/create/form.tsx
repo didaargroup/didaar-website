@@ -5,11 +5,13 @@ import { createPageAction } from "@/app/actions";
 import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
 import { Checkbox } from "@/components/admin/ui/checkbox";
+import { Button } from "@/components/admin/ui/button";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { FormSection, HeadingSection } from "@/components/admin/form-layout";
-import { LucideType } from "lucide-react";
+import { Type, Link2, FileText, Eye } from "lucide-react";
 import { useFormRegistry } from "@/lib/form-actions";
 import { useNotifications } from "@/contexts/notification-context";
+import { cn } from "@/lib/utils";
 
 function slugify(text: string): string {
   return text
@@ -23,6 +25,7 @@ function slugify(text: string): string {
 export function CreatePageForm() {
   const [state, formAction] = useActionState(createPageAction, {});
   const [isDirty, setIsDirty] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const slugManuallyEdited = useRef(false);
 
@@ -56,21 +59,29 @@ export function CreatePageForm() {
     submit: async () => formRef.current?.requestSubmit(),
   });
 
-  // Reset dirty state after successful submission
+  // Handle form submission state
   useEffect(() => {
-    if (state.success) showSuccess(state.success);
-    if (state?.errors && state.errors.formErrors)
+    if (state.success) {
+      showSuccess(state.success);
+      setIsDirty(false);
+      formRef.current?.reset();
+      slugManuallyEdited.current = false;
+    }
+    if (state?.errors?.formErrors) {
       showError(state.errors.formErrors.join("\n"));
-    setIsDirty(false);
-    formRef.current?.reset();
-  }, [state.errors]);
+    }
+  }, [state]);
+
+  const handleSubmit = () => {
+    setIsPending(true);
+  };
 
   return (
     <form
       action={formAction}
       ref={formRef}
       id="create-page-form"
-      className=" @container"
+      className="@container"
       onChange={() => setIsDirty(true)}
     >
       <FormSection
@@ -78,13 +89,14 @@ export function CreatePageForm() {
           <HeadingSection
             title="Primary Details"
             description="Fill in the details to create a new page"
-          ></HeadingSection>
+          />
         }
       >
-        <div className="space-y-6">
-          <div className="">
-            <Label htmlFor="title">
-              <LucideType className="text-gray-400 w-4 h-4" />
+        <div className="space-y-5">
+          {/* Title Field */}
+          <div className="space-y-2">
+            <Label htmlFor="title" className="text-sm font-medium">
+              <Type className="w-4 h-4" />
               Title
             </Label>
             <Input
@@ -92,16 +104,28 @@ export function CreatePageForm() {
               id="title"
               name="title"
               onChange={handleTitleChange}
+              className={cn(
+                state?.errors?.fieldErrors?.title && "border-destructive focus-visible:ring-destructive/20"
+              )}
+              aria-invalid={!!state?.errors?.fieldErrors?.title}
+              aria-describedby={
+                state?.errors?.fieldErrors?.title ? "title-error" : undefined
+              }
             />
-            {state?.errors && state.errors?.fieldErrors?.title && (
-              <p className="text-xs text-destructive pt-2">
-                {state.errors.fieldErrors.title.join("\n")}
+            {state?.errors?.fieldErrors?.title && (
+              <p id="title-error" className="text-xs text-destructive">
+                {state.errors.fieldErrors.title.join(", ")}
               </p>
             )}
+            <p className="text-xs text-muted-foreground">
+              Enter a descriptive title for your page (4-100 characters)
+            </p>
           </div>
-          <div className="">
-            <Label htmlFor="slug">
-              <LucideType className="text-gray-400 w-4 h-4" />
+
+          {/* Slug Field */}
+          <div className="space-y-2">
+            <Label htmlFor="slug" className="text-sm font-medium">
+              <Link2 className="w-4 h-4" />
               Slug
             </Label>
             <Input
@@ -109,27 +133,73 @@ export function CreatePageForm() {
               name="slug"
               placeholder="an-awesome-page"
               onInput={handleSlugInput}
+              className={cn(
+                state?.errors?.fieldErrors?.slug && "border-destructive focus-visible:ring-destructive/20"
+              )}
+              aria-invalid={!!state?.errors?.fieldErrors?.slug}
+              aria-describedby={
+                state?.errors?.fieldErrors?.slug ? "slug-error" : "slug-hint"
+              }
             />
-            {state?.errors && state.errors?.fieldErrors?.slug && (
-              <p className="text-xs text-destructive pt-2">
-                {state.errors.fieldErrors.slug.join("\n")}
+            {state?.errors?.fieldErrors?.slug ? (
+              <p id="slug-error" className="text-xs text-destructive">
+                {state.errors.fieldErrors.slug.join(", ")}
+              </p>
+            ) : (
+              <p id="slug-hint" className="text-xs text-muted-foreground">
+                URL-friendly version of the title (auto-generated from title)
               </p>
             )}
           </div>
 
-          <div className="@sm:flex gap-4">
-            <div className="flex gap-2">
-              <Checkbox id="isDraft" name="isDraft" defaultChecked={true} />
-              <Label htmlFor="isDraft">This is a draft</Label>
-            </div>
+          {/* Options Section */}
+          <div className="space-y-3 pt-2">
+            <p className="text-sm font-medium text-foreground">Page Options</p>
+            
+            <div className="space-y-3">
+              {/* Draft Checkbox */}
+              <div className="flex items-start gap-3 group">
+                <Checkbox
+                  id="isDraft"
+                  name="isDraft"
+                  defaultChecked={true}
+                  className="mt-0.5"
+                />
+                <div className="flex-1 space-y-1">
+                  <Label
+                    htmlFor="isDraft"
+                    className="cursor-pointer font-normal text-sm"
+                  >
+                    <FileText className="w-4 h-4 inline mr-1" />
+                    Save as draft
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Page will not be visible to visitors until published
+                  </p>
+                </div>
+              </div>
 
-            <div className="flex gap-2">
-              <Checkbox
-                id="showOnMenu"
-                name="showOnMenu"
-                defaultChecked={true}
-              />
-              <Label htmlFor="showOnMenu">Show on menu</Label>
+              {/* Show on Menu Checkbox */}
+              <div className="flex items-start gap-3 group">
+                <Checkbox
+                  id="showOnMenu"
+                  name="showOnMenu"
+                  defaultChecked={true}
+                  className="mt-0.5"
+                />
+                <div className="flex-1 space-y-1">
+                  <Label
+                    htmlFor="showOnMenu"
+                    className="cursor-pointer font-normal text-sm"
+                  >
+                    <Eye className="w-4 h-4 inline mr-1" />
+                    Show on menu
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    Include this page in the site navigation menu
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { NotificationProvider } from "@/contexts/notification-context";
 import { NotificationToast } from "@/components/admin/notification-toast";
 import { PageTreeProvider } from "@/contexts/page-tree-context";
 import { getPagesTree } from "@/lib/page";
+import "./vars.css"
 
 export default async function DashboardLayout({
   children,
