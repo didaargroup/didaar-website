@@ -82,20 +82,7 @@ export function PagesTree() {
   return (
     <div className="flex justify-center">
       <div className="w-full max-w-2xl">
-        {/* Section header with separator */}
-        <div className="flex items-center gap-4 mb-6">
-          <h2
-            className="uppercase tracking-wider"
-            style={{
-              fontSize: "var(--puck-font-size-xs)",
-              fontWeight: 500,
-              color: "var(--puck-color-grey-07)"
-            }}
-          >
-            Page Structure
-          </h2>
-        
-        </div>
+
 
         {/* Tree container with subtle border and shadow */}
         <div

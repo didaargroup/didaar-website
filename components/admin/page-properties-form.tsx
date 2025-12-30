@@ -119,10 +119,6 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
     }
   }, [
     state.success,
-    state.data,
-    showSuccess,
-    updatePageInTree,
-    setSelectedPage,
   ]);
 
   // Revert tree to original values when validation fails
@@ -171,7 +167,6 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
       {/* Title Form */}
       <form
         action={formAction}
-        style={{ display: "flex", flexDirection: "column", gap: "16px" }}
         ref={formRef}
         onChange={() => setIsDirty(true)}
       >

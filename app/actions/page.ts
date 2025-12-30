@@ -5,13 +5,15 @@ import { Page, pages, pageTranslations } from "@/db/schema";
 import { requireAuth } from "@/lib/route-guard";
 import { tryCatch } from "@/lib/utils";
 import { FormResults } from "@/types/actions";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { updatePageSchema } from "./fields-schema";
+import { pageContentSchema, updatePageSchema } from "./fields-schema";
 import z from "zod";
-import { buildPageTree, updateFullPathForSlugChange, updateFullPathsForTree } from "@/lib/page";
-import { FormStatus } from "react-dom";
+import { buildPageTree, updateFullPathForSlugChange, updateFullPathsForTree, updatePageFullPath } from "@/lib/page";
 import { getCurrentSession } from "@/lib/session";
+import { redirect } from "next/navigation";
+import { z } from "@/node_modules/zod/v4/classic/external.cjs";
+import { FormState, db } from "../_actions_";
 
 
 // Todo
@@ -191,19 +193,20 @@ export async function updatePageAction(
     data: result.data,
   };
 }
-/**
- * Save page order after drag and drop reordering
- */
 
+
+type SavePageOrderResult = FormResults<null, null>
+/**
+ * Save the order of pages based on the provided form data
+ * 
+ * @param prevState 
+ * @param formData 
+ * @returns 
+ */
 export async function savePageOrder(prevState: FormState, formData: FormData) {
-	const { user } = await getCurrentSession();
-	if (!user) {
-		return {
-			errors: {
-				_form: ["You must be logged in to save page order"],
-			},
-		};
-	}
+  await requireAuth();
+
+  const db = getDb();
 
 	// Get the order data from form data
 	const orderData = formData.get("order");
@@ -267,4 +270,296 @@ export async function savePageOrder(prevState: FormState, formData: FormData) {
 			},
 		};
 	}
+}export async function savePageContent(
+	pageId: number,
+	locale: string,
+	prevState: FormState,
+	formData: FormData
+) {
+	const { user } = await getCurrentSession();
+	if (!user) {
+		redirect("/login");
+	}
+
+	const action = formData.get("action") as string | null;
+
+	// Handle delete action
+	if (action === "delete") {
+		try {
+			// Check if page exists
+			const [existingPage] = await db
+				.select()
+				.from(pages)
+				.where(eq(pages.id, pageId))
+				.limit(1);
+
+			if (!existingPage) {
+				return {
+					errors: {
+						_form: ["Page not found"],
+					},
+				};
+			}
+
+			// Delete the translation
+			await db
+				.delete(pageTranslations)
+				.where(
+					and(
+						eq(pageTranslations.pageId, pageId),
+						eq(pageTranslations.locale, locale)
+					)
+				);
+
+			// Revalidate paths
+			revalidatePath("/admin");
+			revalidatePath(`/${locale}/${existingPage.slug}`);
+
+			return { success: true, deleted: true };
+		} catch (error) {
+			console.error("Error deleting page translation:", error);
+			return {
+				errors: {
+					_form: ["Failed to delete page translation. Please try again."],
+				},
+			};
+		}
+	}
+
+	// Handle toggle-publish action
+	if (action === "toggle-publish") {
+		try {
+			// Get current translation to toggle published status
+			const [existingTranslation] = await db
+				.select()
+				.from(pageTranslations)
+				.where(
+					and(
+						eq(pageTranslations.pageId, pageId),
+						eq(pageTranslations.locale, locale)
+					)
+				)
+				.limit(1);
+
+			if (!existingTranslation) {
+				return {
+					errors: {
+						_form: ["Translation not found. Please save the page first."],
+					},
+				};
+			}
+
+			const newPublishedStatus = !existingTranslation.published;
+
+			// Parse isDraft status from form data
+			const rawIsDraft = formData.get("isDraft");
+			let isDraft = false;
+			if (typeof rawIsDraft === "string") {
+				isDraft = rawIsDraft === "true";
+			}
+
+			// Update page isDraft status
+			await db
+				.update(pages)
+				.set({ isDraft })
+				.where(eq(pages.id, pageId));
+
+			// Update published status
+			await db
+				.update(pageTranslations)
+				.set({ published: newPublishedStatus })
+				.where(
+					and(
+						eq(pageTranslations.pageId, pageId),
+						eq(pageTranslations.locale, locale)
+					)
+				);
+
+			// Revalidate paths
+			revalidatePath("/admin");
+			revalidatePath(`/${locale}`);
+
+			return { success: true, published: newPublishedStatus };
+		} catch (error) {
+			console.error("Error toggling publish status:", error);
+			return {
+				errors: {
+					_form: ["Failed to update publish status. Please try again."],
+				},
+			};
+		}
+	}
+
+	// Handle default save action
+	const rawTitle = formData.get("title");
+	const rawContent = formData.get("content");
+	const rawPublished = formData.get("published");
+	const rawIsDraft = formData.get("isDraft");
+
+	// Parse content if it's a string
+	let content = rawContent;
+	if (typeof rawContent === "string") {
+		try {
+			content = JSON.parse(rawContent);
+		} catch (error) {
+			return {
+				errors: {
+					_form: ["Invalid content format. Content must be valid JSON."],
+				},
+			};
+		}
+	}
+
+	const validatedFields = pageContentSchema.safeParse({
+		title: rawTitle,
+		content: content,
+	});
+
+	if (!validatedFields.success) {
+		console.log("Validation errors:", validatedFields.error.flatten().fieldErrors);
+		return {
+			errors: validatedFields.error.flatten().fieldErrors,
+		};
+	}
+
+	const { title, content: validatedContent } = validatedFields.data;
+
+	// Parse published status
+	let published = true;
+	if (typeof rawPublished === "string") {
+		published = rawPublished === "true";
+	}
+
+	// Parse isDraft status
+	let isDraft = false;
+	if (typeof rawIsDraft === "string") {
+		isDraft = rawIsDraft === "true";
+	}
+
+	try {
+		// Check if page exists
+		const [existingPage] = await db
+			.select()
+			.from(pages)
+			.where(eq(pages.id, pageId))
+			.limit(1);
+
+		if (!existingPage) {
+			return {
+				errors: {
+					_form: ["Page not found"],
+				},
+			};
+		}
+
+		// Update page isDraft status
+		await db
+			.update(pages)
+			.set({ isDraft })
+			.where(eq(pages.id, pageId));
+
+		// Update or insert page translation
+		await db
+			.insert(pageTranslations)
+			.values({
+				pageId,
+				locale,
+				title,
+				content: validatedContent || { root: { props: {}, children: [] } },
+				published,
+			})
+			.onConflictDoUpdate({
+				target: [pageTranslations.pageId, pageTranslations.locale],
+				set: {
+					title,
+					content: validatedContent || { root: { props: {}, children: [] } },
+					published,
+				},
+			});
+
+		// Revalidate paths
+		revalidatePath("/admin");
+		revalidatePath(`/${locale}/${existingPage.slug}`);
+
+		return { success: true, published };
+	} catch (error) {
+		console.error("Error saving page content:", error);
+		return {
+			errors: {
+				_form: ["Failed to save page content. Please try again."],
+			},
+		};
+	}
 }
+const createPageSchema = z.object({
+	title: z.string().min(1).max(100),
+});
+function slugify(text: string): string {
+	return text.toLowerCase()
+		.replace(/\s+/g, '-')
+		.replace(/[^a-z0-9-]/g, '')
+		.replace(/-+/g, '-')
+		.trim();
+}
+
+export async function createPageAction(prevState: FormState, formData: FormData) {
+	const { user } = await getCurrentSession();
+	if (!user) {
+		redirect("/login");
+	}
+
+	const rawTitle = formData.get("title");
+
+	const validatedFields = createPageSchema.safeParse({
+		title: rawTitle,
+	});
+
+	if (!validatedFields.success) {
+		return {
+			errors: validatedFields.error.flatten().fieldErrors,
+		};
+	}
+
+	// Generate slug from title if not provided
+	const slug = slugify(validatedFields.data.title);
+
+	try {
+		const [newPage] = await db.insert(pages).values({
+			title: validatedFields.data.title,
+			slug: slug,
+			fullPath: slug, // Initial fullPath
+			isDraft: true,
+		}).returning();
+
+		// Update fullPath based on parent hierarchy (if parent exists)
+		await updatePageFullPath(newPage.id);
+
+		// Create initial translations for both locales
+		await db.insert(pageTranslations).values([
+			{
+				pageId: newPage.id,
+				locale: "en",
+				title: validatedFields.data.title,
+				content: { root: { props: {}, children: [] } },
+			},
+			{
+				pageId: newPage.id,
+				locale: "fa",
+				title: validatedFields.data.title,
+				content: { root: { props: {}, children: [] } },
+			},
+		]);
+
+		revalidatePath("/admin");
+	} catch (error) {
+		console.log("Error creating page:", error);
+		return {
+			errors: {
+				_form: ["Failed to create page. Please try again."],
+			},
+		};
+	}
+
+	redirect("/admin");
+}
+
