@@ -1,32 +1,45 @@
+import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 
 export const FormSection = ({
-  heading, children,
+  heading,
+  children,
 }: {
   heading: ReactNode;
   children: React.ReactNode;
 }) => (
   <>
     <section
-      className="@xl:grid border @xl:p-6 rounded-lg bg-white overflow-hidden shadow-sm"
-      style={{ gridTemplateColumns: "1fr 3fr", gap: "2rem" }}
+      className={cn(
+        "border rounded-lg overflow-hidden shadow-md/5 gap-6",
+        "@2xl:grid @2xl:border-none @2xl:rounded-none @2xl:overflow-auto @2xl:shadow-none"
+      )}
+      style={{ gridTemplateColumns: "minmax(20ch, auto) 1fr" }}
     >
       <div className="">{heading}</div>
-      <div className="mt-4 @xl:mt-0 p-4 @xl:p-0">{children}</div>
+      <div
+        className={cn(
+          "p-4 bg-white max-w-2xl",
+          "@2xl:p-6 @2xl:rounded-lg @2xl:overflow-hidden @2xl:border @2xl:shadow-md/5"
+        )}
+      >
+        {children}
+      </div>
     </section>
   </>
 );
 export const HeadingSection = ({
-  title, description,
+  title,
+  description,
 }: {
   title: string;
   description?: string;
 }) => (
   <>
-    <h3 className="text-lg font-semibold text-foreground bg-gray-100 @xl:bg-white p-3 border-b @xl:p-0 @xl:border-none">
+    <h3 className="text-lg font-semibold text-foreground p-3 border-b @2xl:p-0 @2xl:border-none">
       {title}
     </h3>
-    <p className="text-sm text-muted-foreground mt-1 hidden @xl:block">
+    <p className="text-sm text-muted-foreground mt-1 hidden @2xl:block">
       {description}
     </p>
   </>

@@ -1,53 +1,60 @@
-"use server"
+"use server";
 
 import { getDb } from "@/db";
 import { Page, pages, pageTranslations } from "@/db/schema";
 import { requireAuth } from "@/lib/route-guard";
 import { tryCatch } from "@/lib/utils";
 import { FormResults } from "@/types/actions";
-import { and, eq } from "drizzle-orm";
+import { and, eq, is } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { pageContentSchema, updatePageSchema } from "./fields-schema";
+import {
+  createPageSchema,
+  pageContentSchema,
+  updatePageSchema,
+} from "./fields-schema";
 import z from "zod";
-import { buildPageTree, updateFullPathForSlugChange, updateFullPathsForTree, updatePageFullPath } from "@/lib/page";
+import {
+  buildPageTree,
+  updateFullPathForSlugChange,
+  updateFullPathsForTree,
+  updatePageFullPath,
+} from "@/lib/page";
 import { getCurrentSession } from "@/lib/session";
 import { redirect } from "next/navigation";
-import { z } from "@/node_modules/zod/v4/classic/external.cjs";
-import { FormState, db } from "../_actions_";
-
 
 // Todo
- type FormState = {
+type FormState = {
   errors?: {
-    formErrors?: string[]
+    formErrors?: string[];
     fieldErrors?: {
-      title?: string[]
-      slug?: string[]
-      isDraft?: string[]
-      showOnMenu?: string[]
-      parentId?: string[]
-    }
-  }
-  success?: boolean
+      title?: string[];
+      slug?: string[];
+      isDraft?: string[];
+      showOnMenu?: string[];
+      parentId?: string[];
+    };
+  };
+  success?: boolean;
   updatedPage?: {
-    id: number
-    title: string
-    slug: string
-    isDraft: boolean
-    showOnMenu: boolean
-    sortOrder: number
-    parentId: number | null
-  }
-}
-
+    id: number;
+    title: string;
+    slug: string;
+    isDraft: boolean;
+    showOnMenu: boolean;
+    sortOrder: number;
+    parentId: number | null;
+  };
+};
 
 /**
  * Delete a page by its ID
- * 
- * @param pageId 
+ *
+ * @param pageId
  * @returns Status of the deletion operation
  */
-export async function deletePageAction(pageId: number): Promise<FormResults<null>> {
+export async function deletePageAction(
+  pageId: number
+): Promise<FormResults<null>> {
   await requireAuth();
 
   const db = getDb();
@@ -91,7 +98,7 @@ export async function deletePageAction(pageId: number): Promise<FormResults<null
     revalidatePath("/admin");
     revalidatePath(`/${existingPage.slug}`);
 
-    return { success: "Page deleted successfully"};
+    return { success: "Page deleted successfully" };
   });
 
   if (!result.success) {
@@ -105,7 +112,8 @@ export async function deletePageAction(pageId: number): Promise<FormResults<null
   return result.data;
 }
 
-type UpdatePageResult = FormResults<z.infer<typeof updatePageSchema>, Page> 
+type UpdatePageResult = FormResults<z.infer<typeof updatePageSchema>, Page>;
+
 /**
  * Update a page's properties
  *
@@ -120,7 +128,6 @@ export async function updatePageAction(
 ): Promise<UpdatePageResult> {
   await requireAuth();
 
-
   const getData = (formData: FormData) => ({
     title: formData.get("title"),
     slug: formData.get("slug"),
@@ -132,12 +139,14 @@ export async function updatePageAction(
 
   if (!validatedFields.success) {
     return {
-      errors: {fieldErrors: z.flattenError(validatedFields.error).fieldErrors},
+      errors: {
+        fieldErrors: z.flattenError(validatedFields.error).fieldErrors,
+      },
     };
   }
 
   const db = getDb();
-  const {title, slug, isDraft, showOnMenu } = validatedFields.data;
+  const { title, slug, isDraft, showOnMenu } = validatedFields.data;
 
   const result = await tryCatch(async () => {
     const [existingPage] = await db
@@ -194,372 +203,369 @@ export async function updatePageAction(
   };
 }
 
-
-type SavePageOrderResult = FormResults<null, null>
+type SavePageOrderResult = FormResults<null, null>;
 /**
  * Save the order of pages based on the provided form data
- * 
- * @param prevState 
- * @param formData 
- * @returns 
+ *
+ * @param prevState
+ * @param formData
+ * @returns
  */
 export async function savePageOrder(prevState: FormState, formData: FormData) {
   await requireAuth();
 
   const db = getDb();
 
-	// Get the order data from form data
-	const orderData = formData.get("order");
-	if (!orderData || typeof orderData !== "string") {
-		return {
-			errors: {
-				_form: ["Invalid order data"],
-			},
-		};
-	}
+  // Get the order data from form data
+  const orderData = formData.get("order");
+  if (!orderData || typeof orderData !== "string") {
+    return {
+      errors: {
+        _form: ["Invalid order data"],
+      },
+    };
+  }
 
-	try {
-		const pagesOrder = JSON.parse(orderData) as Array<{
-			id: string;
-			parentId: string | null;
-			sortOrder: number;
-		}>;
+  try {
+    const pagesOrder = JSON.parse(orderData) as Array<{
+      id: string;
+      parentId: string | null;
+      sortOrder: number;
+    }>;
 
-		console.log("Saving page order:", pagesOrder);
+    console.log("Saving page order:", pagesOrder);
 
-		// First, update all pages' parent and sort order
-		for (const page of pagesOrder) {
-			await db
-				.update(pages)
-				.set({
-					parentId: page.parentId ? Number(page.parentId) : null,
-					sortOrder: page.sortOrder,
-				})
-				.where(eq(pages.id, Number(page.id)))
-				.returning();
-		}
+    // First, update all pages' parent and sort order
+    for (const page of pagesOrder) {
+      await db
+        .update(pages)
+        .set({
+          parentId: page.parentId ? Number(page.parentId) : null,
+          sortOrder: page.sortOrder,
+        })
+        .where(eq(pages.id, Number(page.id)))
+        .returning();
+    }
 
-		// After updating all parent relationships, fetch the complete tree
-		// and update all full paths in a single batch operation
-		const allPages = await db.select().from(pages).orderBy(pages.sortOrder);
+    // After updating all parent relationships, fetch the complete tree
+    // and update all full paths in a single batch operation
+    const allPages = await db.select().from(pages).orderBy(pages.sortOrder);
 
-		// Build the tree structure
-		const allTranslations = await db.select().from(pageTranslations);
-		const translationsMap = new Map<number, (typeof pageTranslations.$inferSelect)[]>();
+    // Build the tree structure
+    const allTranslations = await db.select().from(pageTranslations);
+    const translationsMap = new Map<
+      number,
+      (typeof pageTranslations.$inferSelect)[]
+    >();
 
-		allTranslations.forEach(t => {
-			if (!translationsMap.has(t.pageId)) {
-				translationsMap.set(t.pageId, []);
-			}
-			translationsMap.get(t.pageId)!.push(t);
-		});
+    allTranslations.forEach((t) => {
+      if (!translationsMap.has(t.pageId)) {
+        translationsMap.set(t.pageId, []);
+      }
+      translationsMap.get(t.pageId)!.push(t);
+    });
 
-		const tree = buildPageTree(allPages, translationsMap, null);
+    const tree = buildPageTree(allPages, translationsMap, null);
 
-		// Update full paths for all pages in one batch
-		await updateFullPathsForTree(tree);
+    // Update full paths for all pages in one batch
+    await updateFullPathsForTree(tree);
 
-		revalidatePath("/admin");
+    revalidatePath("/admin");
 
-		return { success: true };
-	} catch (error) {
-		console.error("Error saving page order:", error);
-		return {
-			errors: {
-				_form: ["Failed to save page order. Please try again."],
-			},
-		};
-	}
-}export async function savePageContent(
-	pageId: number,
-	locale: string,
-	prevState: FormState,
-	formData: FormData
+    return { success: true };
+  } catch (error) {
+    console.error("Error saving page order:", error);
+    return {
+      errors: {
+        _form: ["Failed to save page order. Please try again."],
+      },
+    };
+  }
+}
+
+export async function savePageContent(
+  pageId: number,
+  locale: string,
+  prevState: FormState,
+  formData: FormData
 ) {
-	const { user } = await getCurrentSession();
-	if (!user) {
-		redirect("/login");
-	}
+  const { user } = await getCurrentSession();
+  if (!user) {
+    redirect("/login");
+  }
 
-	const action = formData.get("action") as string | null;
+  const action = formData.get("action") as string | null;
 
-	// Handle delete action
-	if (action === "delete") {
-		try {
-			// Check if page exists
-			const [existingPage] = await db
-				.select()
-				.from(pages)
-				.where(eq(pages.id, pageId))
-				.limit(1);
+  // Handle delete action
+  if (action === "delete") {
+    try {
+      // Check if page exists
+      const [existingPage] = await db
+        .select()
+        .from(pages)
+        .where(eq(pages.id, pageId))
+        .limit(1);
 
-			if (!existingPage) {
-				return {
-					errors: {
-						_form: ["Page not found"],
-					},
-				};
-			}
+      if (!existingPage) {
+        return {
+          errors: {
+            _form: ["Page not found"],
+          },
+        };
+      }
 
-			// Delete the translation
-			await db
-				.delete(pageTranslations)
-				.where(
-					and(
-						eq(pageTranslations.pageId, pageId),
-						eq(pageTranslations.locale, locale)
-					)
-				);
+      // Delete the translation
+      await db
+        .delete(pageTranslations)
+        .where(
+          and(
+            eq(pageTranslations.pageId, pageId),
+            eq(pageTranslations.locale, locale)
+          )
+        );
 
-			// Revalidate paths
-			revalidatePath("/admin");
-			revalidatePath(`/${locale}/${existingPage.slug}`);
+      // Revalidate paths
+      revalidatePath("/admin");
+      revalidatePath(`/${locale}/${existingPage.slug}`);
 
-			return { success: true, deleted: true };
-		} catch (error) {
-			console.error("Error deleting page translation:", error);
-			return {
-				errors: {
-					_form: ["Failed to delete page translation. Please try again."],
-				},
-			};
-		}
-	}
+      return { success: true, deleted: true };
+    } catch (error) {
+      console.error("Error deleting page translation:", error);
+      return {
+        errors: {
+          _form: ["Failed to delete page translation. Please try again."],
+        },
+      };
+    }
+  }
 
-	// Handle toggle-publish action
-	if (action === "toggle-publish") {
-		try {
-			// Get current translation to toggle published status
-			const [existingTranslation] = await db
-				.select()
-				.from(pageTranslations)
-				.where(
-					and(
-						eq(pageTranslations.pageId, pageId),
-						eq(pageTranslations.locale, locale)
-					)
-				)
-				.limit(1);
+  // Handle toggle-publish action
+  if (action === "toggle-publish") {
+    try {
+      // Get current translation to toggle published status
+      const [existingTranslation] = await db
+        .select()
+        .from(pageTranslations)
+        .where(
+          and(
+            eq(pageTranslations.pageId, pageId),
+            eq(pageTranslations.locale, locale)
+          )
+        )
+        .limit(1);
 
-			if (!existingTranslation) {
-				return {
-					errors: {
-						_form: ["Translation not found. Please save the page first."],
-					},
-				};
-			}
+      if (!existingTranslation) {
+        return {
+          errors: {
+            _form: ["Translation not found. Please save the page first."],
+          },
+        };
+      }
 
-			const newPublishedStatus = !existingTranslation.published;
+      const newPublishedStatus = !existingTranslation.published;
 
-			// Parse isDraft status from form data
-			const rawIsDraft = formData.get("isDraft");
-			let isDraft = false;
-			if (typeof rawIsDraft === "string") {
-				isDraft = rawIsDraft === "true";
-			}
+      // Parse isDraft status from form data
+      const rawIsDraft = formData.get("isDraft");
+      let isDraft = false;
+      if (typeof rawIsDraft === "string") {
+        isDraft = rawIsDraft === "true";
+      }
 
-			// Update page isDraft status
-			await db
-				.update(pages)
-				.set({ isDraft })
-				.where(eq(pages.id, pageId));
+      // Update page isDraft status
+      await db.update(pages).set({ isDraft }).where(eq(pages.id, pageId));
 
-			// Update published status
-			await db
-				.update(pageTranslations)
-				.set({ published: newPublishedStatus })
-				.where(
-					and(
-						eq(pageTranslations.pageId, pageId),
-						eq(pageTranslations.locale, locale)
-					)
-				);
+      // Update published status
+      await db
+        .update(pageTranslations)
+        .set({ published: newPublishedStatus })
+        .where(
+          and(
+            eq(pageTranslations.pageId, pageId),
+            eq(pageTranslations.locale, locale)
+          )
+        );
 
-			// Revalidate paths
-			revalidatePath("/admin");
-			revalidatePath(`/${locale}`);
+      // Revalidate paths
+      revalidatePath("/admin");
+      revalidatePath(`/${locale}`);
 
-			return { success: true, published: newPublishedStatus };
-		} catch (error) {
-			console.error("Error toggling publish status:", error);
-			return {
-				errors: {
-					_form: ["Failed to update publish status. Please try again."],
-				},
-			};
-		}
-	}
+      return { success: true, published: newPublishedStatus };
+    } catch (error) {
+      console.error("Error toggling publish status:", error);
+      return {
+        errors: {
+          _form: ["Failed to update publish status. Please try again."],
+        },
+      };
+    }
+  }
 
-	// Handle default save action
-	const rawTitle = formData.get("title");
-	const rawContent = formData.get("content");
-	const rawPublished = formData.get("published");
-	const rawIsDraft = formData.get("isDraft");
+  // Handle default save action
+  const rawTitle = formData.get("title");
+  const rawContent = formData.get("content");
+  const rawPublished = formData.get("published");
+  const rawIsDraft = formData.get("isDraft");
 
-	// Parse content if it's a string
-	let content = rawContent;
-	if (typeof rawContent === "string") {
-		try {
-			content = JSON.parse(rawContent);
-		} catch (error) {
-			return {
-				errors: {
-					_form: ["Invalid content format. Content must be valid JSON."],
-				},
-			};
-		}
-	}
+  // Parse content if it's a string
+  let content = rawContent;
+  if (typeof rawContent === "string") {
+    try {
+      content = JSON.parse(rawContent);
+    } catch (error) {
+      return {
+        errors: {
+          _form: ["Invalid content format. Content must be valid JSON."],
+        },
+      };
+    }
+  }
 
-	const validatedFields = pageContentSchema.safeParse({
-		title: rawTitle,
-		content: content,
-	});
+  const validatedFields = pageContentSchema.safeParse({
+    title: rawTitle,
+    content: content,
+  });
 
-	if (!validatedFields.success) {
-		console.log("Validation errors:", validatedFields.error.flatten().fieldErrors);
-		return {
-			errors: validatedFields.error.flatten().fieldErrors,
-		};
-	}
+  if (!validatedFields.success) {
+    console.log(
+      "Validation errors:",
+      validatedFields.error.flatten().fieldErrors
+    );
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
+  }
 
-	const { title, content: validatedContent } = validatedFields.data;
+  const { title, content: validatedContent } = validatedFields.data;
 
-	// Parse published status
-	let published = true;
-	if (typeof rawPublished === "string") {
-		published = rawPublished === "true";
-	}
+  // Parse published status
+  let published = true;
+  if (typeof rawPublished === "string") {
+    published = rawPublished === "true";
+  }
 
-	// Parse isDraft status
-	let isDraft = false;
-	if (typeof rawIsDraft === "string") {
-		isDraft = rawIsDraft === "true";
-	}
+  // Parse isDraft status
+  let isDraft = false;
+  if (typeof rawIsDraft === "string") {
+    isDraft = rawIsDraft === "true";
+  }
 
-	try {
-		// Check if page exists
-		const [existingPage] = await db
-			.select()
-			.from(pages)
-			.where(eq(pages.id, pageId))
-			.limit(1);
+  try {
+    // Check if page exists
+    const [existingPage] = await db
+      .select()
+      .from(pages)
+      .where(eq(pages.id, pageId))
+      .limit(1);
 
-		if (!existingPage) {
-			return {
-				errors: {
-					_form: ["Page not found"],
-				},
-			};
-		}
+    if (!existingPage) {
+      return {
+        errors: {
+          _form: ["Page not found"],
+        },
+      };
+    }
 
-		// Update page isDraft status
-		await db
-			.update(pages)
-			.set({ isDraft })
-			.where(eq(pages.id, pageId));
+    // Update page isDraft status
+    await db.update(pages).set({ isDraft }).where(eq(pages.id, pageId));
 
-		// Update or insert page translation
-		await db
-			.insert(pageTranslations)
-			.values({
-				pageId,
-				locale,
-				title,
-				content: validatedContent || { root: { props: {}, children: [] } },
-				published,
-			})
-			.onConflictDoUpdate({
-				target: [pageTranslations.pageId, pageTranslations.locale],
-				set: {
-					title,
-					content: validatedContent || { root: { props: {}, children: [] } },
-					published,
-				},
-			});
+    // Update or insert page translation
+    await db
+      .insert(pageTranslations)
+      .values({
+        pageId,
+        locale,
+        title,
+        content: validatedContent || { root: { props: {}, children: [] } },
+        published,
+      })
+      .onConflictDoUpdate({
+        target: [pageTranslations.pageId, pageTranslations.locale],
+        set: {
+          title,
+          content: validatedContent || { root: { props: {}, children: [] } },
+          published,
+        },
+      });
 
-		// Revalidate paths
-		revalidatePath("/admin");
-		revalidatePath(`/${locale}/${existingPage.slug}`);
+    // Revalidate paths
+    revalidatePath("/admin");
+    revalidatePath(`/${locale}/${existingPage.slug}`);
 
-		return { success: true, published };
-	} catch (error) {
-		console.error("Error saving page content:", error);
-		return {
-			errors: {
-				_form: ["Failed to save page content. Please try again."],
-			},
-		};
-	}
-}
-const createPageSchema = z.object({
-	title: z.string().min(1).max(100),
-});
-function slugify(text: string): string {
-	return text.toLowerCase()
-		.replace(/\s+/g, '-')
-		.replace(/[^a-z0-9-]/g, '')
-		.replace(/-+/g, '-')
-		.trim();
+    return { success: true, published };
+  } catch (error) {
+    console.error("Error saving page content:", error);
+    return {
+      errors: {
+        _form: ["Failed to save page content. Please try again."],
+      },
+    };
+  }
 }
 
-export async function createPageAction(prevState: FormState, formData: FormData) {
-	const { user } = await getCurrentSession();
-	if (!user) {
-		redirect("/login");
-	}
+type CreatePageState = FormResults<z.infer<typeof createPageSchema>, Page>;
 
-	const rawTitle = formData.get("title");
+/**
+ * Create a new page
+ * 
+ * @param prevState 
+ * @param formData 
+ * @returns 
+ */
+export async function createPageAction(
+  prevState: CreatePageState,
+  formData: FormData
+): Promise<CreatePageState> {
+  await requireAuth();
 
-	const validatedFields = createPageSchema.safeParse({
-		title: rawTitle,
-	});
+  const validatedFields = createPageSchema.safeParse({
+    title: formData.get("title"),
+    slug: formData.get("slug"),
+    isDraft: formData.get("isDraft"),
+    showOnMenu: formData.get("showOnMenu"),
+  });
 
-	if (!validatedFields.success) {
-		return {
-			errors: validatedFields.error.flatten().fieldErrors,
-		};
-	}
+  if (!validatedFields.success) {
+    return {
+      errors: {
+        fieldErrors: z.flattenError(validatedFields.error).fieldErrors,
+      },
+    };
+  }
 
-	// Generate slug from title if not provided
-	const slug = slugify(validatedFields.data.title);
+  const db = getDb();
 
-	try {
-		const [newPage] = await db.insert(pages).values({
-			title: validatedFields.data.title,
-			slug: slug,
-			fullPath: slug, // Initial fullPath
-			isDraft: true,
-		}).returning();
+  const result = await tryCatch(async () => {
+    const [newPage] = await db
+      .insert(pages)
+      .values(validatedFields.data)
+      .returning();
 
-		// Update fullPath based on parent hierarchy (if parent exists)
-		await updatePageFullPath(newPage.id);
-
-		// Create initial translations for both locales
-		await db.insert(pageTranslations).values([
-			{
-				pageId: newPage.id,
-				locale: "en",
-				title: validatedFields.data.title,
-				content: { root: { props: {}, children: [] } },
-			},
-			{
-				pageId: newPage.id,
-				locale: "fa",
-				title: validatedFields.data.title,
-				content: { root: { props: {}, children: [] } },
-			},
-		]);
+    // Create initial translations for both locales
+    await db.insert(pageTranslations).values(
+      ["en", "fa"].map((locale) => ({
+        pageId: newPage.id,
+        locale,
+        title: validatedFields.data.title,
+        content: { root: { props: {}, children: [] } },
+      }))
+    );
 
 		revalidatePath("/admin");
-	} catch (error) {
-		console.log("Error creating page:", error);
+
+		return newPage;
+  });
+
+	if (!result.success) {
 		return {
 			errors: {
-				_form: ["Failed to create page. Please try again."],
-			},
-		};
+				formErrors: [result.error.message]
+			}
+		}
 	}
 
-	redirect("/admin");
-}
+	return {
+		success: "Page created successfully",
+		data: result.data
+	}
 
+}

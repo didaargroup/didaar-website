@@ -1,0 +1,6 @@
+{
+  "cssvar.files": [
+    "**/*.css",
+    "node_modules/@measured/puck/dist/index.css"
+  ]
+}
