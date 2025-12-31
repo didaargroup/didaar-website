@@ -1,6 +1,6 @@
 import type { ComponentConfig } from "@measured/puck";
 import { getTextDirection } from "@/lib/text-direction";
-import { RTLTextInput } from "./rtl-text-input";
+import { RTLTextInput } from "@/components/admin/rtl-text-input";
 
 export const HeadingBlock: ComponentConfig<{
   title: string;

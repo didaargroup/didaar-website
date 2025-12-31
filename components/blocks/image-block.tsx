@@ -2,9 +2,9 @@
 
 import type { ComponentConfig } from "@measured/puck";
 import { Image as ImageIcon } from "lucide-react";
-import { ImageField } from "./image-field";
+import { ImageField } from "@/components/admin/image-field";
 import { getTextDirection } from "@/lib/text-direction";
-import { RTLTextInput } from "./rtl-text-input";
+import { RTLTextInput } from "@/components/admin/rtl-text-input";
 import type { ImageBlockProps } from "@/types/components";
 
 export const ImageBlock: ComponentConfig<ImageBlockProps> = {
