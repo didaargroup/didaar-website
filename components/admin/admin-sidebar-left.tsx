@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { IconButton } from "@measured/puck";
+import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
   FileText,
@@ -11,7 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { Component, useState } from "react";
-import { useAdminLayout } from "@/app/admin/(dashboard)/admin-layout-context";
+import { useAdminLayout } from "@/contexts/admin-layout-context";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -40,7 +40,7 @@ export function AdminSidebar() {
         data-sidebar
         data-sidebar-visible={sidebarLeftVisible}
         className={cn(
-          "fixed top-0 left-0 z-50 h-screen w-64 transition-all duration-300 ease-in-out lg:static lg:translate-x-0 flex-shrink-0 flex flex-col overflow-y-auto",
+          "admin-area fixed top-0 left-0 z-50 h-screen w-64 transition-all duration-300 ease-in-out lg:static lg:translate-x-0 flex-shrink-0 flex flex-col overflow-y-auto",
           !sidebarLeftVisible && "-translate-x-full lg:translate-x-0 lg:w-0 lg:overflow-hidden",
           mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         )}

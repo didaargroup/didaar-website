@@ -37,9 +37,9 @@ export async function checkInvitationStatus(): Promise<InvitationStatus> {
  */
 export async function submitInvitation(
 	userId: number,
-	_: FormResults<z.infer<typeof validateInvitationCodeSchema>>,
+	_: FormResults<z.infer<typeof validateInvitationCodeSchema>, null>,
 	formData: FormData
-): Promise<FormResults<z.infer<typeof validateInvitationCodeSchema>>> {
+): Promise<FormResults<z.infer<typeof validateInvitationCodeSchema>, null>> {
 
 	const validatedFields = validateInvitationCodeSchema.safeParse({
 		code: formData.get("code") as string,

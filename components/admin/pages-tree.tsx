@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react"
 import { SortableTree, PageTreeNode } from "@/components/admin/sortable-tree"
-import { SavePageOrderButton } from "./page-order-save"
 import { usePageTree } from "@/contexts/page-tree-context"
 import { useNotifications } from "@/contexts/notification-context"
 
@@ -39,33 +38,9 @@ function flattenTreeWithOrder(
 
 export function PagesTree() {
   const { pagesTree: items, setPagesTree, isRefreshing } = usePageTree()
-  const { showSuccess, showError } = useNotifications()
-  const [isTainted, setIsTainted] = useState(false)
-  const [saveSuccess, setSaveSuccess] = useState(false)
-  const lastSavedItems = useRef<PageTreeNode[]>(items)
 
   const handleChange = (newItems: PageTreeNode[]) => {
     setPagesTree(newItems)
-    setIsTainted(true)
-    setSaveSuccess(false)
-  }
-
-  // Reset tainted state when items match last saved items
-  useEffect(() => {
-    const itemsMatch = JSON.stringify(items) === JSON.stringify(lastSavedItems.current)
-    if (itemsMatch && isTainted) {
-      setIsTainted(false)
-    }
-  }, [items, isTainted])
-
-  // Handle successful save
-  const handleSaveSuccess = () => {
-    lastSavedItems.current = items
-    setIsTainted(false)
-    setSaveSuccess(true)
-    showSuccess("Page order saved successfully!")
-    // Clear success message after 3 seconds
-    setTimeout(() => setSaveSuccess(false), 3000)
   }
 
   // Get flattened order data for saving
@@ -89,19 +64,6 @@ export function PagesTree() {
           data-pages-order={JSON.stringify(orderData)}
         >
           <SortableTree items={items} onChange={handleChange} />
-          
-          {/* Save button */}
-          {isTainted && (
-            <div
-              className="mt-6 flex justify-end"
-              style={{
-                paddingTop: "var(--puck-space-16)",
-                borderTop: "1px solid var(--puck-color-grey-09)"
-              }}
-            >
-              <SavePageOrderButton onSaveSuccess={handleSaveSuccess} />
-            </div>
-          )}
         </div>
       </div>
     </div>

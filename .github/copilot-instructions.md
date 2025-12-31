@@ -128,7 +128,7 @@ pnpm db:studio    # Open Drizzle Studio for visual inspection
 
 ### Server Action Definition
 
-**Location**: `app/actions.ts` (centralized server actions)
+**Location**: `app/_actions/` (centralized server actions directory)
 
 **Standard Pattern**:
 ```typescript
@@ -764,6 +764,163 @@ GITHUB_CLIENT_REDIRECT_URI=http://localhost:3000/api/login/github/callback
 5. Should redirect to `/signup` (new user)
 6. Enter invitation code
 7. Should redirect to `/admin`
+
+## Component & Form Organization
+
+**CRITICAL**: Follow these rules when creating new components or forms.
+
+### Naming Convention
+
+**File Names**: Use **kebab-case** (e.g., `admin-header.tsx`)
+**Component Names**: Use **PascalCase** (e.g., `AdminHeader`)
+
+**Rationale**:
+- ✅ Consistency with Shadcn UI
+- ✅ Cross-platform safety (no case-sensitivity issues on Linux)
+- ✅ URL-friendly
+- ✅ Modern React/Next.js standard
+
+**Example**:
+```typescript
+// File: components/admin/admin-header.tsx
+"use client";
+
+export function AdminHeader() {
+  return <header>...</header>;
+}
+
+// Import:
+import { AdminHeader } from "@/components/admin/admin-header";
+```
+
+**See Also**: `NAMING_CONVENTION_ANALYSIS.md` for detailed comparison.
+
+### Decision Tree
+
+```
+Is it a form?
+├─ Yes → Used in ONLY one route?
+│   ├─ Yes → app/route/form.tsx
+│   └─ No → components/feature/{feature}-form.tsx
+└─ No → Reusable UI component?
+    ├─ Yes → components/ (admin/, ui/, guest-*)
+    └─ No → Layout/route wrapper?
+        ├─ Yes → app/route-group/{purpose}-content.tsx
+        └─ No → Context provider?
+            ├─ Yes → contexts/{feature}-context.tsx
+            └─ No → components/feature/{component}.tsx
+```
+
+### Location Rules
+
+| Component Type | Location | File Name | Component Name | Example |
+|----------------|----------|-----------|----------------|---------|
+| Route-specific form | `app/route/form.tsx` | `form.tsx` | `{Route}Form` | `app/admin/pages/create/form.tsx` → `CreatePageForm` |
+| Reusable form | `components/feature/` | `{feature}-form.tsx` | `{Feature}Form` | `components/admin/page-properties-form.tsx` → `PagePropertiesForm` |
+| Route layout wrapper | `app/route-group/` | `{purpose}-content.tsx` | `{Purpose}Content` | `app/admin/dashboard-content.tsx` → `DashboardContent` |
+| Reusable UI component | `components/` | `{component}.tsx` | `{Component}` | `components/admin/admin-header.tsx` → `AdminHeader` |
+| Context provider | `contexts/` | `{feature}-context.tsx` | `{Feature}Provider` | `contexts/notification-context.tsx` → `NotificationProvider` |
+| Puck block | `components/admin/` | `{type}-block.tsx` | `{Type}Block` | `components/admin/image-block.tsx` → `ImageBlock` |
+
+### Key Principles
+
+1. **Route-specific forms** → Co-locate with route in `app/route/form.tsx`
+   - Used ONLY for one specific route
+   - Tightly coupled to route logic
+   - NOT reused elsewhere
+   - Example: `app/admin/pages/create/form.tsx` → `CreatePageForm`
+
+2. **Reusable forms** → `components/feature/`
+   - Used in multiple routes or shared UI (sidebars, modals)
+   - Independently testable
+   - Generic, reusable purpose
+   - Example: `components/admin/page-properties-form.tsx` → `PagePropertiesForm`
+
+3. **Reusable UI components** → `components/`
+   - Used in multiple places
+   - Feature-agnostic or part of design system
+   - Example: `components/admin/admin-header.tsx` → `AdminHeader`
+
+4. **Layout wrappers** → `app/route-group/`
+   - Define layout structure for route group
+   - Wrap all pages in route group
+   - Provide context for route group
+   - Example: `app/admin/dashboard-content.tsx` → `DashboardContent`
+
+5. **Context providers** → `contexts/`
+   - Shared across multiple route groups
+   - Not tightly coupled to one route
+   - Example: `contexts/notification-context.tsx` → `NotificationProvider`
+
+6. **Puck blocks** → `components/admin/`
+   - Page editor components
+   - Part of admin design system
+   - Example: `components/admin/image-block.tsx` → `ImageBlock`
+
+### Naming Conventions
+
+| Type | File Name | Component Name |
+|------|-----------|----------------|
+| Form (route-specific) | `form.tsx` | `{Route}Form` |
+| Form (reusable) | `{feature}-form.tsx` | `{Feature}Form` |
+| Layout wrapper | `{purpose}-content.tsx` | `{Purpose}Content` |
+| UI component | `{component}.tsx` | `{Component}` |
+| Context | `{feature}-context.tsx` | `{Feature}Provider`, `use{Feature}` |
+| Puck block | `{type}-block.tsx` | `{Type}Block` |
+
+### Import Patterns
+
+```typescript
+// ✅ GOOD: Page importing co-located form
+import { CreatePageForm } from "./form";
+
+// ✅ GOOD: Page importing reusable component
+import { AdminHeader } from "@/components/admin/admin-header";
+
+// ✅ GOOD: Component importing server action
+import { createPageAction } from "@/app/_actions";
+
+// ❌ BAD: Component importing from app/ (unless actions)
+import { Something } from "@/app/some-route/component";
+```
+
+### Common Patterns
+
+**Route with Form**:
+```typescript
+// app/admin/pages/create/page.tsx
+import { CreatePageForm } from "./form";
+
+export default async function CreatePage() {
+  return <CreatePageForm />;
+}
+```
+
+```typescript
+// app/admin/pages/create/form.tsx
+"use client";
+
+export function CreatePageForm() {
+  // ...
+}
+```
+
+**Reusable Component**:
+```typescript
+// components/admin/admin-header.tsx
+"use client";
+
+export function AdminHeader() {
+  return <header>...</header>;
+}
+```
+
+```typescript
+// app/admin/layout.tsx
+import { AdminHeader } from "@/components/admin/admin-header";
+```
+
+**See Also**: `COMPONENT_ORGANIZATION_ANALYSIS.md` for detailed analysis and `COMPONENT_ORGANIZATION_QUICK_REF.md` for quick reference.
 
 ## MCP
 

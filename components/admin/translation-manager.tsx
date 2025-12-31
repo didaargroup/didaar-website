@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@measured/puck"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -56,7 +56,7 @@ export function TranslationManager({ pageId, pageSlug, translations }: Translati
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="admin-area sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Manage Translations</DialogTitle>
           <DialogDescription>

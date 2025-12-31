@@ -1,7 +1,7 @@
 "use client";
 
 import { usePageSelection } from "@/components/admin/page-selection-context";
-import { Button } from "@measured/puck";
+import { Button } from "@/components/ui/button";
 import { Plus, Globe } from "lucide-react";
 import Link from "next/link";
 
@@ -28,7 +28,7 @@ export function SidebarTranslations({ translations = [] }: SidebarTranslationsPr
   const missingLocales = availableLocales.filter((locale) => !existingLocales.has(locale));
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+    <div className="admin-area" style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
       {/* Header */}
       <div
         className="flex items-center gap-2"

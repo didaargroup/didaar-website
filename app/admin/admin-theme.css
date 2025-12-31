@@ -1,0 +1,246 @@
+/* ============================================================================
+   ADMIN THEME - Puck Integration Layer
+   ============================================================================
+
+   This file extends the base Shadcn theme with Puck-specific overrides.
+   It imports Puck's CSS and maps Puck variables to Shadcn tokens for consistency.
+
+   Design Principles:
+   - Puck variables are loaded from @measured/puck package
+   - Shadcn tokens reference Puck variables (not redefined)
+   - Single source of truth for colors and spacing
+   - Tailwind-first approach for component styling
+   ============================================================================ */
+
+/* Import Puck's CSS - this loads all --puck-color-* and --puck-space-* variables */
+@import "@measured/puck/puck.css";
+
+/* ============================================================================
+   SHADCN TOKEN MAPPINGS TO PUCK VARIABLES
+   Map Shadcn's semantic tokens to Puck's color palette
+   ============================================================================ */
+
+:root {
+  /* Primary colors → Puck Azure */
+  --primary: var(--puck-color-azure-04);
+  --primary-foreground: var(--puck-color-white);
+
+  /* Secondary colors → Puck Grey */
+  --secondary: var(--puck-color-grey-11);
+  --secondary-foreground: var(--puck-color-grey-01);
+
+  /* Muted colors → Puck Grey light */
+  --muted: var(--puck-color-grey-11);
+  --muted-foreground: var(--puck-color-grey-05);
+
+  /* Accent colors → Puck Azure light */
+  --accent: var(--puck-color-azure-12);
+  --accent-foreground: var(--puck-color-azure-04);
+
+  /* Destructive colors → Puck Red */
+  --destructive: var(--puck-color-red-05);
+  --destructive-foreground: var(--puck-color-white);
+
+  /* Border and Input → Puck Grey */
+  --border: var(--puck-color-grey-09);
+  --input: var(--puck-color-grey-09);
+  --ring: var(--puck-color-azure-05);
+
+  /* Background and Foreground */
+  --background: var(--puck-color-white);
+  --foreground: var(--puck-color-grey-01);
+
+  /* Card colors */
+  --card: var(--puck-color-white);
+  --card-foreground: var(--puck-color-grey-01);
+
+  /* Popover colors */
+  --popover: var(--puck-color-white);
+  --popover-foreground: var(--puck-color-grey-01);
+
+  /* Radius - match Puck's 4px border-radius */
+  --radius: 0.25rem;
+
+  /* Puck-specific sizing for inputs and buttons */
+  --puck-input-height: 40px;
+  --puck-input-padding: 12px 15px;
+  --puck-button-medium-height: 34px;
+  --puck-button-medium-padding: 7px 19px;
+  --puck-button-large-height: 40px;
+  --puck-button-large-padding: 11px 19px;
+
+  /* Puck spacing variables - these are scoped to .puck class in source, defining here for admin use */
+  --puck-space-px: 16px;
+}
+
+/* ============================================================================
+   PUCK-COMPATIBLE COMPONENT OVERRIDES
+   Match Puck's exact styling for inputs and buttons in admin area
+   ============================================================================ */
+
+/* Input styling to match Puck exactly */
+.admin-area input[type="text"],
+.admin-area input[type="email"],
+.admin-area input[type="password"],
+.admin-area input[type="number"],
+.admin-area textarea,
+.admin-area select {
+  border-radius: 4px !important;
+  padding: 12px 15px !important;
+  font-size: 14px !important;
+  border: 1px solid var(--puck-color-grey-09) !important;
+  background: var(--puck-color-white) !important;
+  transition: border-color 50ms ease-in !important;
+}
+
+.admin-area input:focus,
+.admin-area textarea:focus,
+.admin-area select:focus {
+  border-color: var(--puck-color-grey-05) !important;
+  outline: 2px solid var(--puck-color-azure-05) !important;
+  outline-offset: 0 !important;
+}
+
+/* Button styling to match Puck exactly */
+.admin-area button[data-slot="button"] {
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.05ch !important;
+  line-height: 1 !important;
+  transition: background-color 50ms ease-in !important;
+}
+
+.admin-area button[data-variant="primary"] {
+  background: var(--puck-color-azure-04) !important;
+}
+
+.admin-area button[data-variant="primary"]:hover {
+  background-color: var(--puck-color-azure-03) !important;
+}
+
+.admin-area button[data-variant="primary"]:active {
+  background-color: var(--puck-color-azure-02) !important;
+}
+
+.admin-area button[data-variant="puck-secondary"] {
+  border: 1px solid currentColor !important;
+  background: transparent !important;
+}
+
+.admin-area button[data-variant="puck-secondary"]:hover {
+  background-color: var(--puck-color-azure-12) !important;
+  color: var(--puck-color-black) !important;
+}
+
+.admin-area button[data-variant="puck-secondary"]:active {
+  background-color: var(--puck-color-azure-11) !important;
+  color: var(--puck-color-black) !important;
+}
+
+.admin-area button[data-size="medium"] {
+  min-height: 34px !important;
+  padding: 7px 19px !important;
+}
+
+.admin-area button[data-size="large"] {
+  min-height: 40px !important;
+  padding: 11px 19px !important;
+}
+
+.admin-area button:focus-visible {
+  outline: 2px solid var(--puck-color-azure-05) !important;
+  outline-offset: 2px !important;
+}
+
+/* ============================================================================
+   DARK MODE OVERRIDES
+   Map Shadcn dark mode tokens to Puck's darker palette
+   ============================================================================ */
+
+.dark {
+  /* Primary colors → Puck Azure lighter for dark mode */
+  --primary: var(--puck-color-azure-06);
+  --primary-foreground: var(--puck-color-white);
+
+  /* Secondary colors → Puck Grey darker */
+  --secondary: var(--puck-color-grey-02);
+  --secondary-foreground: var(--puck-color-grey-11);
+
+  /* Muted colors */
+  --muted: var(--puck-color-grey-02);
+  --muted-foreground: var(--puck-color-grey-06);
+
+  /* Accent colors */
+  --accent: var(--puck-color-grey-02);
+  --accent-foreground: var(--puck-color-azure-06);
+
+  /* Destructive colors → Puck Red lighter */
+  --destructive: var(--puck-color-red-06);
+  --destructive-foreground: var(--puck-color-white);
+
+  /* Border and Input */
+  --border: var(--puck-color-grey-02);
+  --input: var(--puck-color-grey-02);
+  --ring: var(--puck-color-azure-05);
+
+  /* Background and Foreground - inverted for dark mode */
+  --background: var(--puck-color-grey-01);
+  --foreground: var(--puck-color-grey-11);
+
+  /* Card colors */
+  --card: var(--puck-color-grey-02);
+  --card-foreground: var(--puck-color-grey-11);
+
+  /* Popover colors */
+  --popover: var(--puck-color-grey-02);
+  --popover-foreground: var(--puck-color-grey-11);
+}
+
+/* ============================================================================
+   PUCK COMPONENT OVERRIDES
+   Minimal overrides to make Puck components match Shadcn theme
+   ============================================================================ */
+
+/* Ensure Puck components respect our border radius */
+.puck-Button,
+.puck-Input,
+.puck-TextField,
+.puck-Select {
+  border-radius: var(--radius);
+}
+
+/* Make Puck components use Shadcn color tokens */
+.puck-ActionBar {
+  background-color: var(--muted);
+  border-color: var(--border);
+}
+
+.puck-Drawer {
+  background-color: var(--background);
+  border-color: var(--border);
+}
+
+/* ============================================================================
+   ADMIN-SPECIFIC UTILITIES
+   Custom utility classes for admin area that combine Puck + Shadcn
+   ============================================================================ */
+
+/* Admin container with Puck spacing */
+.admin-container {
+  padding: var(--puck-space-px);
+}
+
+/* Admin card with Shadcn tokens */
+.admin-card {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--puck-space-px);
+}
+
+/* Admin focus ring using Puck azure */
+.admin-focus-ring:focus-visible {
+  outline: 2px solid var(--puck-color-azure-05);
+  outline-offset: 2px;
+}

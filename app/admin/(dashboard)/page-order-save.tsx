@@ -1,7 +1,7 @@
 "use client"
 
 import { useActionState, useEffect, useRef } from "react"
-import { savePageOrder } from "@/app/actions"
+import { savePageOrder } from "@/app/_actions"
 import { Button } from "@measured/puck"
 
 type FormState = {

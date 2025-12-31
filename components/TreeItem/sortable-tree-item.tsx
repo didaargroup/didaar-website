@@ -3,7 +3,7 @@ import type {UniqueIdentifier} from '@dnd-kit/core';
 import {AnimateLayoutChanges, useSortable} from '@dnd-kit/sortable';
 import {CSS} from '@dnd-kit/utilities';
 
-import {TreeItem, Props as TreeItemProps} from './TreeItem';
+import {TreeItem, Props as TreeItemProps} from './tree-item';
 import {iOS} from '../utilities';
 
 interface Props extends Omit<TreeItemProps, 'translations' | 'pageSlug' | 'pageId' | 'onClick'> {

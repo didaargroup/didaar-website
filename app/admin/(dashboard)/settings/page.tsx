@@ -1,5 +1,5 @@
 import { requireAuth } from "@/lib/route-guard";
-import { SettingsForm } from "./settings-form";
+import { SettingsForm } from "./form";
 import { getSiteSettings } from "@/lib/site-settings";
 
 export const metadata = {

@@ -1,6 +1,6 @@
 "use client"
 
-import { updateSiteSettingsAction } from "@/app/actions"
+import { updateSiteSettingsAction } from "@/app/_actions"
 import { Button } from "@measured/puck"
 import { useActionState, useEffect, useState, useCallback } from "react"
 import type { SiteSettings } from "@/lib/site-settings"

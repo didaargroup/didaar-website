@@ -1,6 +1,6 @@
 "use client";
 
-import { useAdminLayout } from "@/app/admin/(dashboard)/admin-layout-context";
+import { useAdminLayout } from "@/contexts/admin-layout-context";
 import type { AdminSidebarRightProps } from "@/types/components";
 
 export function AdminSidebarRight({ children, title = "Properties" }: AdminSidebarRightProps) {
@@ -12,6 +12,7 @@ export function AdminSidebarRight({ children, title = "Properties" }: AdminSideb
       <aside
         data-sidebar-right
         data-sidebar-right-visible={sidebarRightVisible}
+        className="admin-area"
         style={{
           position: "relative",
           display: "flex",

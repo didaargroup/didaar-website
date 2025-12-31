@@ -54,7 +54,7 @@ type FormState = {
  */
 export async function deletePageAction(
   pageId: number
-): Promise<FormResults<null>> {
+): Promise<FormResults<null, null>> {
   await requireAuth();
 
   const db = getDb();
@@ -294,6 +294,7 @@ export async function savePageContent(
     redirect("/login");
   }
 
+  const db = getDb();
   const action = formData.get("action") as string | null;
 
   // Handle delete action

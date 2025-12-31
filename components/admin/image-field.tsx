@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Upload, X, Image as ImageIcon, Loader2 } from "lucide-react";
-import { Button } from "@measured/puck";
+import { Button } from "@/components/ui/button";
 
 interface ImageFieldProps {
   value?: string;
@@ -74,7 +74,7 @@ export function ImageField({ value, onChange, label }: ImageFieldProps) {
   );
 
   return (
-    <div className="space-y-4">
+    <div className="admin-area space-y-4">
       {label && (
         <label className="text-sm font-medium">{label}</label>
       )}

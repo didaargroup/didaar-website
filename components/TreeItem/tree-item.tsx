@@ -56,7 +56,7 @@ export const TreeItem = forwardRef<HTMLDivElement, Props>(
     return (
       <li
         className={cn(
-          "relative list-none",
+          "admin-area relative list-none",
           clone && "opacity-50",
           ghost && "opacity-30",
           disableInteraction && "pointer-events-none"

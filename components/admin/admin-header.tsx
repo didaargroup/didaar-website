@@ -1,13 +1,13 @@
 "use client";
 
-import { Button, IconButton } from "@measured/puck";
+import { Button } from "@/components/ui/button";
 import { LogOut, PanelLeft, PanelRight } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { logout } from "@/app/actions/auth";
+import { logout } from "@/app/_actions/auth";
 import {
   isButtonAction,
   useAdminLayout,
-} from "@/app/admin/(dashboard)/admin-layout-context";
+} from "@/contexts/admin-layout-context";
 import { HeaderAction } from "@/types";
 import { useEffect, useMemo } from "react";
 
@@ -53,50 +53,39 @@ export function AdminHeader() {
   }, [setActions]);
 
   return (
-    <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 relative max-w-screen">
-      <div className="grid items-end gap-(--puck-space-px) grid-areas-[left_middle_right] grid-cols-[1fr_auto_1fr] grid-rows-auto p-(--puck-space-px)">
-        {/* Left side - Toggle buttons (always visible like Puck) */}
-        <div className="flex -ms-1 pt-0.5">
-          <div
-            className={
-              sidebarLeftVisible
-                ? "text-gray-900 dark:text-gray-100"
-                : "text-gray-400 dark:text-gray-600"
-            }
+    <header className="admin-area bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 relative max-w-screen">
+      <div className="flex items-center gap-4 px-4 py-2" style={{ gap: "var(--puck-space-px)", padding: "var(--puck-space-px)" }}>
+        {/* Left side - Toggle buttons */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            title="Toggle left sidebar"
+            onClick={toggleSidebarLeft}
+            className={sidebarLeftVisible ? "text-foreground" : "text-muted-foreground"}
           >
-            <IconButton
-              type="button"
-              title="Toggle left sidebar"
-              onClick={toggleSidebarLeft}
-            >
-              <PanelLeft focusable="false" />
-            </IconButton>
-          </div>
-          <div
-            className={
-              sidebarRightVisible
-                ? "text-gray-900 dark:text-gray-100"
-                : "text-gray-400 dark:text-gray-600"
-            }
+            <PanelLeft focusable="false" className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            title="Toggle right sidebar"
+            onClick={toggleSidebarRight}
+            className={sidebarRightVisible ? "text-foreground" : "text-muted-foreground"}
           >
-            <IconButton
-              type="button"
-              title="Toggle right sidebar"
-              onClick={toggleSidebarRight}
-            >
-              <PanelRight focusable="false" />
-            </IconButton>
-          </div>
+            <PanelRight focusable="false" className="h-4 w-4" />
+          </Button>
         </div>
 
-        {/* Middle - Title (using Puck's Heading style) */}
-        <div className="self-center block text-gray-900 dark:text-gray-100 font-bold m-0 text-xs">
-          {/* {pathname?.replace("/admin", "") || "Dashboard"} */}
-          {title}
+        {/* Middle - Title */}
+        <div className="flex-1">
+          <h1 className="text-sm font-semibold" style={{ fontSize: "var(--puck-font-size-xxs)", fontWeight: 500 }}>
+            {title}
+          </h1>
         </div>
 
         {/* Right side - Actions */}
-        <div className="flex gap-4 justify-end items-center">
+        <div className="flex items-center gap-2">
           {hasDirtyForm && (
             <Button
               variant="primary"

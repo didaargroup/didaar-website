@@ -1,9 +1,9 @@
 "use client";
 
 import { useActionState, useEffect, useState, useRef } from "react";
-import { Button } from "@measured/puck";
+import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { deletePageAction, updatePageAction } from "@/app/actions";
+import { deletePageAction, updatePageAction } from "@/app/_actions";
 import { Page } from "@/db/schema";
 import type { PageWithTranslations } from "@/types";
 import { useNotifications } from "@/contexts/notification-context";
@@ -162,7 +162,7 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
   }, [deleteState.errors?.formErrors, showError]);
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="admin-area flex flex-col gap-4">
 
       {/* Title Form */}
       <form

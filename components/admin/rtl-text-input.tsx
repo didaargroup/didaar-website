@@ -3,7 +3,7 @@
 import { useRef, memo } from "react";
 import { getTextDirection } from "@/lib/text-direction";
 import { Type } from "lucide-react";
-import { FieldLabel } from "@measured/puck";
+import { Label } from "@/components/ui/label";
 
 interface RTLTextInputProps {
   id?: string;
@@ -84,20 +84,21 @@ const RTLTextInputInner = ({
       />
     );
 
-  // If label is provided, use Puck's FieldLabel component
+  // If label is provided, use Shadcn's Label component
   if (label) {
     return (
-      <div className="last:pb-4">
-        <FieldLabel icon={<Type width={16} height={16} />} label={label} />
-        <div className="mt-3">
-          {inputElement}
-        </div>
+      <div className="admin-area last:pb-4 space-y-2">
+        <Label htmlFor={id} className="flex items-center gap-2">
+          <Type width={16} height={16} />
+          {label}
+        </Label>
+        {inputElement}
       </div>
     );
   }
 
   return (
-    <div className="last:pb-4">
+    <div className="admin-area last:pb-4">
       {inputElement}
     </div>
   );

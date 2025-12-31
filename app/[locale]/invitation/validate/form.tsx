@@ -1,6 +1,6 @@
 "use client";
 
-import { submitInvitation } from "@/app/actions/invitations";
+import { submitInvitation } from "@/app/_actions/invitations";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components/ui/input-otp";

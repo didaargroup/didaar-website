@@ -1,6 +1,6 @@
 "use client";
 
-import { useAdminLayout } from "@/app/admin/(dashboard)/admin-layout-context";
+import { useAdminLayout } from "@/contexts/admin-layout-context";
 import { RegisteredForm } from "@/types";
 import { useEffect, useRef } from "react";
 

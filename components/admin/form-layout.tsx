@@ -14,7 +14,7 @@ export const FormSection = ({
         "border rounded-lg overflow-hidden shadow-md/5 gap-6",
         "@2xl:grid @2xl:border-none @2xl:rounded-none @2xl:overflow-auto @2xl:shadow-none"
       )}
-      style={{ gridTemplateColumns: "minmax(20ch, auto) 1fr" }}
+      style={{ gridTemplateColumns: "25ch 1fr" }}
     >
       <div className="">{heading}</div>
       <div

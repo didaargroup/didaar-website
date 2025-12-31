@@ -2,8 +2,8 @@
 
 import { Puck, Config, Button } from "@measured/puck";
 import { useActionState, useTransition } from "react";
-import { savePageContent } from "@/app/actions";
-import { logout } from "@/app/actions/auth";
+import { savePageContent } from "@/app/_actions";
+import { logout } from "@/app/_actions/auth";
 import { getConfig } from "@/puck.config";
 import { LogOut, Wand } from "lucide-react";
 import Link from "next/link";

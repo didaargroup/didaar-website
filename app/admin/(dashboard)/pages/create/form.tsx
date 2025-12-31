@@ -1,11 +1,11 @@
 "use client";
 
-import { createPageAction } from "@/app/actions";
+import { createPageAction } from "@/app/_actions";
 
-import { Input } from "@/components/admin/ui/input";
-import { Label } from "@/components/admin/ui/label";
-import { Checkbox } from "@/components/admin/ui/checkbox";
-import { Button } from "@/components/admin/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/components/ui/button";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { FormSection, HeadingSection } from "@/components/admin/form-layout";
 import { Type, Link2, FileText, Eye } from "lucide-react";
@@ -81,7 +81,7 @@ export function CreatePageForm() {
       action={formAction}
       ref={formRef}
       id="create-page-form"
-      className="@container"
+      className="admin-area @container"
       onChange={() => setIsDirty(true)}
     >
       <FormSection
