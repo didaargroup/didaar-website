@@ -214,8 +214,7 @@ type SavePageOrderResult = FormResults<null, null>;
 export async function savePageOrder(prevState: FormState, formData: FormData) {
   await requireAuth();
 
-  const db = getDb();
-
+  
   // Get the order data from form data
   const orderData = formData.get("order");
   if (!orderData || typeof orderData !== "string") {
@@ -225,7 +224,9 @@ export async function savePageOrder(prevState: FormState, formData: FormData) {
       },
     };
   }
-
+  
+  const db = getDb();
+  
   try {
     const pagesOrder = JSON.parse(orderData) as Array<{
       id: string;
