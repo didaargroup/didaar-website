@@ -3,9 +3,9 @@
 import { getDb } from "@/db";
 import { Page, pages, pageTranslations } from "@/db/schema";
 import { requireAuth } from "@/lib/route-guard";
-import { tryCatch } from "@/lib/utils";
+import { isTuple, tryCatch } from "@/lib/utils";
 import { FormResults } from "@/types/actions";
-import { and, eq, is } from "drizzle-orm";
+import { and, eq, is, Update } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import {
   createPageSchema,
@@ -21,6 +21,9 @@ import {
 } from "@/lib/page";
 import { getCurrentSession } from "@/lib/session";
 import { redirect } from "next/navigation";
+import { BatchItem } from "drizzle-orm/batch";
+import { RunnableQuery } from "drizzle-orm/runnable-query";
+import { SQLiteUpdate } from "drizzle-orm/sqlite-core";
 
 // Todo
 type FormState = {
@@ -203,7 +206,7 @@ export async function updatePageAction(
   };
 }
 
-type SavePageOrderResult = FormResults<null, null>;
+
 /**
  * Save the order of pages based on the provided form data
  *
@@ -220,37 +223,40 @@ export async function savePageOrder(prevState: FormState, formData: FormData) {
   if (!orderData || typeof orderData !== "string") {
     return {
       errors: {
-        _form: ["Invalid order data"],
+        formErrors:["Invalid order data"],
       },
     };
   }
   
   const db = getDb();
-  
-  try {
+
+  const result = await tryCatch(async () => {
     const pagesOrder = JSON.parse(orderData) as Array<{
       id: string;
       parentId: string | null;
       sortOrder: number;
     }>;
 
-    console.log("Saving page order:", pagesOrder);
-
-    // First, update all pages' parent and sort order
-    for (const page of pagesOrder) {
-      await db
-        .update(pages)
+    // First, update all pages' parent and sort order in a single batch
+    // The batch returns an array of arrays with the updated pages
+    const dbQueries = pagesOrder.map((page) =>
+      db
+        .update(pages) 
         .set({
           parentId: page.parentId ? Number(page.parentId) : null,
           sortOrder: page.sortOrder,
         })
         .where(eq(pages.id, Number(page.id)))
-        .returning();
-    }
+        .returning()
+    );
 
-    // After updating all parent relationships, fetch the complete tree
-    // and update all full paths in a single batch operation
-    const allPages = await db.select().from(pages).orderBy(pages.sortOrder);
+  
+    if (!isTuple(dbQueries)) throw new Error("No pages to update");
+
+    const batchResults = await db.batch(dbQueries);
+
+    // Each query result is an array of Page objects
+    const allPages = batchResults.flat();
 
     // Build the tree structure
     const allTranslations = await db.select().from(pageTranslations);
@@ -273,15 +279,20 @@ export async function savePageOrder(prevState: FormState, formData: FormData) {
 
     revalidatePath("/admin");
 
-    return { success: true };
-  } catch (error) {
-    console.error("Error saving page order:", error);
+  return "Page order updated successfully";
+  });
+
+  if (!result.success) {
     return {
       errors: {
-        _form: ["Failed to save page order. Please try again."],
+        formErrors: ["Failed to save page order. Please try again."],
       },
     };
   }
+
+  return {
+    success: result.data,
+  };
 }
 
 export async function savePageContent(
@@ -428,10 +439,7 @@ export async function savePageContent(
   });
 
   if (!validatedFields.success) {
-    console.log(
-      "Validation errors:",
-      validatedFields.error.flatten().fieldErrors
-    );
+
     return {
       errors: validatedFields.error.flatten().fieldErrors,
     };

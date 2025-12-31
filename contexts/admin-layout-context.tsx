@@ -113,7 +113,7 @@ export function AdminLayoutProvider({ children }: { children: ReactNode }) {
 
   const hasDirtyForm = useMemo(() => {
     const dirty = Array.from(forms.values()).some((f) => f.isDirty);
-    console.log('[AdminLayout] hasDirtyForm:', dirty, 'forms:', forms.size, 'details:', Array.from(forms.entries()).map(([id, f]) => [id, f.isDirty]));
+    
     return dirty;
   }, [forms]);
 

@@ -16,7 +16,7 @@ export default async function SignUpPage({ params }: Props) {
     // Get the current full path to redirect back after login
     const headersList = await headers();
     const pathname = headersList.get("x-pathname") || `/${locale}/invitation/validate`;
-    console.log("No session found, redirecting to login with redirectTo:", pathname);
+    
     redirect(`/${locale}/login?redirectTo=${encodeURIComponent(pathname)}`);
   }
 

@@ -20,7 +20,7 @@
    Map Shadcn's semantic tokens to Puck's color palette
    ============================================================================ */
 
-:root {
+.admin-area{
   /* Primary colors → Puck Azure */
   --primary: var(--puck-color-azure-04);
   --primary-foreground: var(--puck-color-white);
@@ -158,7 +158,7 @@
    Map Shadcn dark mode tokens to Puck's darker palette
    ============================================================================ */
 
-.dark {
+.dark .admin-area {
   /* Primary colors → Puck Azure lighter for dark mode */
   --primary: var(--puck-color-azure-06);
   --primary-foreground: var(--puck-color-white);
@@ -243,4 +243,48 @@
 .admin-focus-ring:focus-visible {
   outline: 2px solid var(--puck-color-azure-05);
   outline-offset: 2px;
+}
+
+/* ============================================================================
+   LOADING ANIMATIONS
+   Minimal gradient overlay for loading states
+   ============================================================================ */
+
+/* Gradient overlay animation */
+@keyframes gradient-overlay {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.loading-overlay {
+  position: relative;
+}
+
+.loading-overlay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(var(--puck-color-azure-04), 0.1) 25%,
+    rgba(var(--puck-color-purple-04), 0.15) 50%,
+    rgba(var(--puck-color-azure-04), 0.1) 75%,
+    transparent 100%
+  );
+  background-size: 200% 200%;
+  animation: gradient-overlay 3s ease infinite;
+  pointer-events: none;
+  z-index: 10;
+  border-radius: var(--radius);
 }

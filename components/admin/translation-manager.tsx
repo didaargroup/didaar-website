@@ -40,7 +40,6 @@ export function TranslationManager({ pageId, pageSlug, translations }: Translati
   // Get missing locales
   const missingLocales = AVAILABLE_LOCALES.filter((l) => !existingLocales.has(l.code))
 
-  console.log("TranslationManager rendered:", { pageId, pageSlug, translations, existingLocales: Array.from(existingLocales) })
 
   return (
     <>

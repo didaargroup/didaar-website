@@ -36,6 +36,7 @@ interface SortableTreeProps {
   collapsible?: boolean;
   removable?: boolean;
   indentationWidth?: number;
+  disabled?: boolean;
 }
 
 // Helper to convert PageTreeNode to TreeItem
@@ -211,6 +212,7 @@ export function SortableTree({
   collapsible = true,
   removable = false,
   indentationWidth = 24,
+  disabled = false,
 }: SortableTreeProps) {
   const { setSelectedPage, selectedPage } = usePageSelection();
   const { pagesTree, setPagesTree } = usePageTree();
@@ -304,8 +306,14 @@ export function SortableTree({
       : null;
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(PointerSensor, { 
+      activationConstraint: { distance: 8 },
+      disabled: disabled 
+    }),
+    useSensor(KeyboardSensor, { 
+      coordinateGetter: sortableKeyboardCoordinates,
+      disabled: disabled 
+    })
   );
 
   const adjustTranslate: Modifiers = [

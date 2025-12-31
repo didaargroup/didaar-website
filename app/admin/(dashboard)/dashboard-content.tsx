@@ -14,7 +14,7 @@ export function DashboardContent({ children }: { children: ReactNode }) {
   return (
     <div className="admin-area h-screen flex flex-col" style={{ backgroundColor: "var(--puck-color-grey-12)" }}>
       <AdminHeader />
-      <div className="flex-1 grid grid-cols-[auto_1fr_auto] overflow-hidden">
+      <div className="flex-1 grid grid-cols-[1fr_auto] lg:grid-cols-[auto_1fr_auto] overflow-hidden">
         <AdminSidebar />
         <main className="flex-1 overflow-auto p-6">
           {children}

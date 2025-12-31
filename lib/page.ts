@@ -8,6 +8,7 @@ import { BatchItem, BatchResponse } from "drizzle-orm/batch";
 import { LibSQLDatabase } from "drizzle-orm/libsql";
 import { RunnableQuery } from "drizzle-orm/runnable-query";
 import * as schema from "@/db/schema";
+import { isTuple } from "./utils";
 
 /**
  * Build a hierarchical tree structure from flat pages array
@@ -589,35 +590,29 @@ export async function updateFullPathForSlugChange(
 }
 
 /**
- * Update full paths for all pages in a tree
- * Call this after reordering pages to update the database in a single batch
+ * Update full paths for all pages in a tree using batch operations
+ * Much more efficient than sequential updates
  */
 export async function updateFullPathsForTree(tree: PageTreeNode[]) {
   const pathMap = buildFullPathMap(tree);
 
-  // Update pages sequentially to avoid SQLite locking issues
-  let successCount = 0;
-  let failureCount = 0;
+  // Build batch update queries
+  const updateQueries = Array.from(pathMap.entries()).map(([pageId, fullPath]) =>
+    db
+      .update(pages)
+      .set({ fullPath })
+      .where(eq(pages.id, parseInt(pageId, 10)))
+      .returning()
+  );
 
-  for (const [pageId, fullPath] of pathMap.entries()) {
-    try {
-      const numericId = parseInt(pageId, 10);
+  if (!isTuple(updateQueries)) return;
 
-      const result = await db
-        .update(pages)
-        .set({ fullPath })
-        .where(eq(pages.id, numericId))
-        .returning();
+  // Execute all updates in a single batch
+  const results = await db.batch(updateQueries);
 
-      if (result.length > 0) {
-        successCount++;
-      } else {
-        failureCount++;
-      }
-    } catch (error) {
-      failureCount++;
-    }
-  }
+  // Verify all updates succeeded
+  const successCount = results.filter(r => r.length > 0).length;
+  const failureCount = results.length - successCount;
 
   if (failureCount > 0) {
     throw new Error(

@@ -44,3 +44,13 @@ export function tryCatchSync<T, E = Error>(
     return { success: false, error: error as E };
   }
 }
+
+/**
+ * Type guard to check if an array is a non-empty tuple
+ * 
+ * @param array 
+ * @returns 
+ */
+export function isTuple<T extends any>(array: T[]): array is [T, ...T[]] {
+   return array.length > 0;
+}

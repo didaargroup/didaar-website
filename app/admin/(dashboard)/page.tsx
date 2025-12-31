@@ -1,6 +1,5 @@
 import { requireAuth } from "@/lib/route-guard";
-import { PagesTree } from "@/components/admin/pages-tree";
-import { PageOrderForm } from "./pages/page-order-form";
+import { PagesTreeForm } from "./pages-tree-form";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { FormSection, HeadingSection } from "@/components/admin/form-layout";
@@ -9,7 +8,7 @@ export default async function DashboardPage() {
   await requireAuth();
 
   return (
-    <div className="p-6 space-y-6 @container">
+    <div className="p-6 space-y-6 @container mb-20">
       <FormSection
         heading={
           <HeadingSection
@@ -35,9 +34,7 @@ export default async function DashboardPage() {
             description="Manage your site pages and content structure">
           </HeadingSection>
       }>
-        <PageOrderForm>
-          <PagesTree />
-        </PageOrderForm>
+        <PagesTreeForm />
       </FormSection>
     </div>
   );
