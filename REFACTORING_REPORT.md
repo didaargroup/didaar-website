@@ -25,7 +25,7 @@ The component organization has been successfully refactored to follow the establ
 
 **Purpose**: Reusable UI components used across multiple routes
 
-#### `components/admin/` (21 files)
+#### `components/admin/` (16 files)
 All admin-specific reusable components:
 
 **Layout Components**:
@@ -53,12 +53,13 @@ All admin-specific reusable components:
 - `tiptap-editor.tsx` → `TipTapEditor` ✅
 - `tip-tap-block.tsx` → `TipTapBlock` ✅
 
-**Puck Blocks**:
-- `grid-block.tsx` → `GridBlock` ✅
-- `heading-block.tsx` → `HeadingBlock` ✅
-- `image-block.tsx` → `ImageBlock` ✅
-- `link-block.tsx` → `LinkBlock` ✅
-- `spacer-block.tsx` → `SpacerBlock` ✅
+#### `components/blocks/` (5 files)
+Puck page builder blocks:
+- `grid-block.tsx` → `GridBlock` ✅ (moved from `components/admin/`)
+- `heading-block.tsx` → `HeadingBlock` ✅ (moved from `components/admin/`)
+- `image-block.tsx` → `ImageBlock` ✅ (moved from `components/admin/`)
+- `link-block.tsx` → `LinkBlock` ✅ (moved from `components/admin/`)
+- `spacer-block.tsx` → `SpacerBlock` ✅ (moved from `components/admin/`)
 
 #### `components/TreeItem/` (3 files)
 Tree component utilities:
@@ -183,7 +184,7 @@ find . -type f -name "*.tsx" ! -path "*/node_modules/*" ! -path "*/.next/*" \
 | Reusable UI components → `components/` | ✅ COMPLIANT | All admin components properly placed |
 | Layout wrappers → `app/route-group/` | ✅ COMPLIANT | `DashboardContent` in dashboard |
 | Context providers → `contexts/` | ✅ COMPLIANT | All 3 contexts properly placed |
-| Puck blocks → `components/admin/` | ✅ COMPLIANT | All blocks properly placed |
+| Puck blocks → `components/blocks/` | ✅ COMPLIANT | All blocks properly placed |
 
 ### ✅ Import Pattern Compliance
 
@@ -195,6 +196,9 @@ find . -type f -name "*.tsx" ! -path "*/node_modules/*" ! -path "*/.next/*" \
 ```typescript
 // ✅ GOOD: Importing reusable component
 import { AdminHeader } from "@/components/admin/admin-header";
+
+// ✅ GOOD: Importing Puck block
+import { ImageBlock } from "@/components/blocks/image-block";
 
 // ✅ GOOD: Importing context provider
 import { useAdminLayout } from "@/contexts/admin-layout-context";
@@ -220,6 +224,7 @@ import { CreatePageForm } from "./form";
 - ✅ `app/actions/` → `app/_actions/` (avoid Next.js route conflicts)
 - ✅ `app/admin/(dashboard)/pages-tree.tsx` → `components/admin/pages-tree.tsx`
 - ✅ `app/admin/(dashboard)/admin-layout-context.tsx` → `contexts/admin-layout-context.tsx`
+- ✅ `components/admin/*-block.tsx` → `components/blocks/` (5 Puck blocks moved)
 
 ### 3. Import Updates
 - ✅ Updated all imports from `@/app/actions` to `@/app/_actions`

@@ -389,7 +389,7 @@ export const ImageBlock = {
 
 **Implementation**:
 ```tsx
-import { ImageBlock } from "@/components/admin/image-block";
+import { ImageBlock } from "@/components/blocks/image-block";
 
 export const getConfig = (locale: string) => ({
   categories: {

@@ -1,11 +1,11 @@
 import type { Config } from "@measured/puck";
 import type { ComponentProps, RootProps } from "@/types/puck";
-import { HeadingBlock } from "./components/admin/heading-block";
-import { GridBlock } from "./components/admin/grid-block";
-import { LinkBlock } from "./components/admin/link-block";
+import { HeadingBlock } from "./components/blocks/heading-block";
+import { GridBlock } from "./components/blocks/grid-block";
+import { LinkBlock } from "./components/blocks/link-block";
 import { TipTapBlock } from "./components/admin/tip-tap-block";
-import { SpacerBlock } from "./components/admin/spacer-block";
-import { ImageBlock } from "./components/admin/image-block";
+import { SpacerBlock } from "./components/blocks/spacer-block";
+import { ImageBlock } from "./components/blocks/image-block";
 
 // Simple preview navbar (no intl context dependency)
 function PreviewNavbar({ locale }: { locale: string }) {

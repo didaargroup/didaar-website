@@ -109,7 +109,7 @@ Type definitions for environment variables.
 import type { SiteSettings } from "@/lib/site-settings"
 import type { MenuItem } from "@/lib/page-tree"
 import type { PageTreeNode } from "@/lib/page"
-import type { ImageBlockProps } from "@/components/admin/image-block"
+import type { ImageBlockProps } from "@/components/blocks/image-block"
 ```
 
 ### After (Centralized Types)

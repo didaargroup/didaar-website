@@ -647,7 +647,7 @@ This provides type safety for JSON columns while letting Drizzle handle serializ
 import type { SiteSettings } from "@/lib/site-settings"
 import type { MenuItem } from "@/lib/page-tree"
 import type { PageTreeNode } from "@/lib/page"
-import type { ImageBlockProps } from "@/components/admin/image-block"
+import type { ImageBlockProps } from "@/components/blocks/image-block"
 ```
 
 **After** (centralized):
@@ -820,7 +820,7 @@ Is it a form?
 | Route layout wrapper | `app/route-group/` | `{purpose}-content.tsx` | `{Purpose}Content` | `app/admin/dashboard-content.tsx` → `DashboardContent` |
 | Reusable UI component | `components/` | `{component}.tsx` | `{Component}` | `components/admin/admin-header.tsx` → `AdminHeader` |
 | Context provider | `contexts/` | `{feature}-context.tsx` | `{Feature}Provider` | `contexts/notification-context.tsx` → `NotificationProvider` |
-| Puck block | `components/admin/` | `{type}-block.tsx` | `{Type}Block` | `components/admin/image-block.tsx` → `ImageBlock` |
+| Puck block | `components/blocks/` | `{type}-block.tsx` | `{Type}Block` | `components/blocks/image-block.tsx` → `ImageBlock` |
 
 ### Key Principles
 
@@ -852,10 +852,10 @@ Is it a form?
    - Not tightly coupled to one route
    - Example: `contexts/notification-context.tsx` → `NotificationProvider`
 
-6. **Puck blocks** → `components/admin/`
-   - Page editor components
-   - Part of admin design system
-   - Example: `components/admin/image-block.tsx` → `ImageBlock`
+6. **Puck blocks** → `components/blocks/`
+   - Page editor content blocks
+   - Part of Puck page builder system
+   - Example: `components/blocks/image-block.tsx` → `ImageBlock`
 
 ### Naming Conventions
 
