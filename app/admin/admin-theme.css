@@ -20,7 +20,13 @@
    Map Shadcn's semantic tokens to Puck's color palette
    ============================================================================ */
 
-.admin-area{
+/* ============================================================================
+   CSS VARIABLE OVERRIDES FOR ADMIN AREA
+   Variables are applied directly to body.admin-area for maximum specificity.
+   The class is added by AdminBodyClass component and removed on navigation.
+   ============================================================================ */
+
+body.admin-area {
   /* Primary colors → Puck Azure */
   --primary: var(--puck-color-azure-04);
   --primary-foreground: var(--puck-color-white);

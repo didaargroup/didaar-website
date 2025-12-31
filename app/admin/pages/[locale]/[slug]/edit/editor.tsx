@@ -1,6 +1,6 @@
 "use client";
 
-import { Puck, Config, Button } from "@measured/puck";
+import { Puck } from "@measured/puck";
 import { useActionState, useTransition } from "react";
 import { savePageContent } from "@/app/_actions";
 import { logout } from "@/app/_actions/auth";
@@ -12,6 +12,7 @@ import * as React from "react";
 import type { ComponentProps, RootProps } from "@/types/puck";
 import type { PageTreeNode } from "@/lib/page";
 import { PageTreeProvider } from "@/contexts/page-tree-context";
+import { Button } from "@/components/ui/button";
 
 type EditorProps = {
   pageId: number;
@@ -143,9 +144,9 @@ export default function Editor({
                 {children}
                 <Button
                   variant="secondary"
-                  icon={<LogOut style={{ width: "14px", height: "14px" }} />}
                   onClick={logout}
                 >
+                  <LogOut size={14} />
                   Logout
                 </Button>
               </div>,

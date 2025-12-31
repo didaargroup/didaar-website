@@ -3,12 +3,14 @@
 import { useCallback, useState } from "react"
 import { SortableTree } from "@/components/admin/sortable-tree"
 import { usePageTree } from "@/contexts/page-tree-context"
+import { useNotifications } from "@/contexts/notification-context"
 import { useFormRegistry } from "@/lib/form-actions"
 import { savePageOrder } from "@/app/_actions"
 import type { PageTreeNode } from "@/types"
 
 export function PagesTreeForm() {
   const { pagesTree: items, setPagesTree, getFlattenedOrder, isDirty } = usePageTree()
+  const { showSuccess, showError } = useNotifications()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleChange = (newItems: PageTreeNode[]) => {
@@ -26,15 +28,19 @@ export function PagesTreeForm() {
       const result = await savePageOrder({} as any, formData)
 
       if (result.errors) {
-        throw new Error("Failed to save page order")
+        const errorMessage = result.errors.formErrors?.[0] || "Failed to save page order"
+        showError(errorMessage)
+        return
       }
 
-      // No need to refresh - the tree is already updated locally via setPagesTree
-      // and the database is updated by the server action
+      // result.success contains the success message from the action
+      showSuccess(result.success || "Page order saved successfully")
+    } catch (error) {
+      showError("An unexpected error occurred while saving page order")
     } finally {
       setIsSubmitting(false)
     }
-  }, [getFlattenedOrder])
+  }, [getFlattenedOrder, showSuccess, showError])
 
   // Register this form with the admin layout context
   useFormRegistry({
@@ -48,8 +54,8 @@ export function PagesTreeForm() {
   return (
     <div className="flex justify-center">
       <div className={`w-full max-w-2xl transition-all duration-300 ${isSubmitting ? "opacity-80 pointer-events-none loading-overlay" : ""}`}>
-        <SortableTree 
-          items={items} 
+        <SortableTree
+          items={items}
           onChange={handleChange}
           disabled={isSubmitting}
         />

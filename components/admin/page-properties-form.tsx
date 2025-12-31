@@ -2,7 +2,11 @@
 
 import { useActionState, useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Trash2, Globe, Eye } from "lucide-react";
+import Link from "next/link";
 import { deletePageAction, updatePageAction } from "@/app/_actions";
 import { Page } from "@/db/schema";
 import type { PageWithTranslations } from "@/types";
@@ -54,11 +58,13 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
   const originalPageRef = useRef(page);
 
   const formRef = useRef<HTMLFormElement>(null);
+  const deleteFormRef = useRef<HTMLFormElement>(null);
 
-  const confirmDelete = async (e: Event) => {
+  const confirmDelete = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    window.confirm("Are you sure you want to delete this page?") &&
-      (await deletePageWithIdAction());
+    if (window.confirm("Are you sure you want to delete this page?")) {
+      deleteFormRef.current?.requestSubmit();
+    }
   };
 
   useFormRegistry<{
@@ -163,28 +169,19 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
 
   return (
     <div className="admin-area flex flex-col gap-4">
-
       {/* Title Form */}
       <form
         action={formAction}
         ref={formRef}
         onChange={() => setIsDirty(true)}
+        className="space-y-4"
       >
         <input type="hidden" name="pageId" value={page.id} />
 
         {/* Title */}
-        <div>
-          <label
-            htmlFor="title"
-            className="block text-xs font-medium mb-1"
-            style={{
-              fontSize: "var(--puck-font-size-xs)",
-              color: "var(--puck-color-grey-02)",
-            }}
-          >
-            Title
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="title">Title</Label>
+          <Input
             id="title"
             name="title"
             type="text"
@@ -195,215 +192,164 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
               // Update tree title in real-time for better UX
               updatePageInTree({ ...page, title: e.target.value });
             }}
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              borderRadius: "4px",
-              border: state.errors?.fieldErrors?.title
-                ? "1px solid var(--puck-color-red-09)"
-                : "1px solid var(--puck-color-grey-09)",
-              background: "var(--puck-color-white)",
-              color: "var(--puck-color-grey-01)",
-              fontSize: "var(--puck-font-size-xs)",
-            }}
+            className={state.errors?.fieldErrors?.title ? "border-destructive" : ""}
           />
           {state.errors?.fieldErrors?.title && (
-            <p
-              className="text-xs mt-1"
-              style={{
-                fontSize: "var(--puck-font-size-xs)",
-                color: "var(--puck-color-red-07)",
-                marginTop: "4px",
-              }}
-            >
+            <p className="text-xs text-destructive">
               {state.errors.fieldErrors.title[0]}
             </p>
           )}
         </div>
 
         {/* Slug */}
-        <div>
-          <label
-            htmlFor="slug"
-            className="block text-xs font-medium mb-1"
-            style={{
-              fontSize: "var(--puck-font-size-xs)",
-              color: "var(--puck-color-grey-02)",
-            }}
-          >
-            Slug
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="slug">Slug</Label>
+          <Input
             id="slug"
             name="slug"
             type="text"
             defaultValue={page.slug}
             placeholder="page-url-slug"
             required
-            style={{
-              width: "100%",
-              padding: "8px 12px",
-              borderRadius: "4px",
-              border: state.errors?.fieldErrors?.slug
-                ? "1px solid var(--puck-color-red-09)"
-                : "1px solid var(--puck-color-grey-09)",
-              background: "var(--puck-color-white)",
-              color: "var(--puck-color-grey-01)",
-              fontSize: "var(--puck-font-size-xs)",
-            }}
+            className={state.errors?.fieldErrors?.slug ? "border-destructive" : ""}
           />
           {state.errors?.fieldErrors?.slug && (
-            <p
-              className="text-xs mt-1"
-              style={{
-                fontSize: "var(--puck-font-size-xs)",
-                color: "var(--puck-color-red-07)",
-                marginTop: "4px",
-              }}
-            >
+            <p className="text-xs text-destructive">
               {state.errors.fieldErrors.slug[0]}
             </p>
           )}
-          <p
-            className="text-xs mt-1"
-            style={{
-              fontSize: "11px",
-              color: "var(--puck-color-grey-07)",
-              marginTop: "4px",
-            }}
-          >
+          <p className="text-xs text-muted-foreground">
             Lowercase letters, numbers, and hyphens only
           </p>
         </div>
 
+        {/* Divider */}
+        <div className="border-t border-border my-2" />
+
+        {/* Translations Section */}
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 pb-2 border-b border-border">
+            <Globe className="w-4 h-4" />
+            <h3 className="text-sm font-semibold">
+              Translations
+            </h3>
+          </div>
+
+          {page.translations && page.translations.length > 0 ? (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Existing translations
+              </p>
+              <div className="space-y-2">
+                {page.translations.map((translation) => (
+                  <div
+                    key={translation.locale}
+                    className="flex items-center justify-between p-2 rounded-md border bg-card"
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium">
+                        {translation.locale === "en" ? "English" : "Farsi"}
+                      </span>
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-md"
+                        style={{
+                          background: translation.published
+                            ? "var(--puck-color-azure-01)"
+                            : "var(--puck-color-grey-08)",
+                          color: translation.published
+                            ? "var(--puck-color-azure-11)"
+                            : "var(--puck-color-grey-12)",
+                        }}
+                      >
+                        {translation.published ? "Published" : "Draft"}
+                      </span>
+                    </div>
+                    <Link href={`/admin/pages/${translation.locale}/${page.slug}/edit`}>
+                      <Button variant="secondary" size="small">
+                        Edit
+                      </Button>
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              No translations yet
+            </p>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div className="border-t border-border my-2" />
+
         {/* Draft Status */}
-        <div>
-          <label
-            className="flex items-center gap-2 cursor-pointer text-xs"
-            style={{
-              fontSize: "var(--puck-font-size-xs)",
-              color: "var(--puck-color-grey-02)",
-            }}
-          >
-            <input
-              type="checkbox"
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="isDraft"
               name="isDraft"
               defaultChecked={page.isDraft}
-              style={{
-                width: "16px",
-                height: "16px",
-                cursor: "pointer",
-                border: state.errors?.fieldErrors?.isDraft
-                  ? "1px solid var(--puck-color-red-09)"
-                  : "1px solid var(--puck-color-grey-09)",
-              }}
+              className={state.errors?.fieldErrors?.isDraft ? "border-destructive" : ""}
             />
-            <span>Draft (unpublished)</span>
-          </label>
+            <Label htmlFor="isDraft" className="cursor-pointer">
+              Draft (unpublished)
+            </Label>
+          </div>
           {state.errors?.fieldErrors?.isDraft && (
-            <p
-              className="text-xs mt-1"
-              style={{
-                fontSize: "var(--puck-font-size-xs)",
-                color: "var(--puck-color-red-07)",
-                marginTop: "4px",
-                marginLeft: "24px",
-              }}
-            >
+            <p className="text-xs text-destructive ml-6">
               {state.errors.fieldErrors.isDraft[0]}
             </p>
           )}
-          <p
-            className="text-xs mt-1"
-            style={{
-              fontSize: "11px",
-              color: "var(--puck-color-grey-07)",
-              marginTop: "4px",
-              marginLeft: "24px",
-            }}
-          >
+          <p className="text-xs text-muted-foreground ml-6">
             Draft pages are not visible to visitors
           </p>
         </div>
 
         {/* Show on Menu */}
-        <div>
-          <label
-            className="flex items-center gap-2 cursor-pointer text-xs"
-            style={{
-              fontSize: "var(--puck-font-size-xs)",
-              color: "var(--puck-color-grey-02)",
-            }}
-          >
-            <input
-              type="checkbox"
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="showOnMenu"
               name="showOnMenu"
               defaultChecked={page.showOnMenu}
-              style={{
-                width: "16px",
-                height: "16px",
-                cursor: "pointer",
-                border: state.errors?.fieldErrors?.showOnMenu
-                  ? "1px solid var(--puck-color-red-09)"
-                  : "1px solid var(--puck-color-grey-09)",
-              }}
+              className={state.errors?.fieldErrors?.showOnMenu ? "border-destructive" : ""}
             />
-            <span>Show in navigation menu</span>
-          </label>
+            <Label htmlFor="showOnMenu" className="cursor-pointer">
+              Show in navigation menu
+            </Label>
+          </div>
           {state.errors?.fieldErrors?.showOnMenu && (
-            <p
-              className="text-xs mt-1"
-              style={{
-                fontSize: "var(--puck-font-size-xs)",
-                color: "var(--puck-color-red-07)",
-                marginTop: "4px",
-                marginLeft: "24px",
-              }}
-            >
+            <p className="text-xs text-destructive ml-6">
               {state.errors.fieldErrors.showOnMenu[0]}
             </p>
           )}
-          <p
-            className="text-xs mt-1"
-            style={{
-              fontSize: "11px",
-              color: "var(--puck-color-grey-07)",
-              marginTop: "4px",
-              marginLeft: "24px",
-            }}
-          >
+          <p className="text-xs text-muted-foreground ml-6">
             Display this page in the site navigation
           </p>
         </div>
 
         {/* Form-level error */}
         {state.errors?.formErrors && state.errors.formErrors.length > 0 && (
-          <div
-            className="p-3 rounded-lg"
-            style={{
-              padding: "12px",
-              borderRadius: "8px",
-              background: "var(--puck-color-red-01)",
-              border: "1px solid var(--puck-color-red-04)",
-            }}
-          >
-            <p
-              className="text-xs"
-              style={{
-                fontSize: "var(--puck-font-size-xs)",
-                color: "var(--puck-color-red-07)",
-              }}
-            >
+          <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20">
+            <p className="text-xs text-destructive">
               {state.errors.formErrors[0]}
             </p>
           </div>
         )}
       </form>
 
-      {/* Delete Form */}
-      <form action={deleteFormAction} style={{ marginTop: "16px" }}>
-        <input type="hidden" name="pageId" value={page.id} />
+{/* View Page Todo */}
+        {/* <Button asChild>
+          <Link href={page.fullPath || '/'} target="_blank" rel="noopener noreferrer">
+              <Eye className="w-4 h-4 mr-2" />
+              View Page
+            </Link>          
+          </Button> */}
 
+      {/* Delete Form */}
+      <form action={deleteFormAction} ref={deleteFormRef} className="mt-4">
+        <input type="hidden" name="pageId" value={page.id} />
         <Button
           type="button"
           onClick={confirmDelete}
@@ -416,19 +362,14 @@ export function PagePropertiesForm({ page }: PagePropertiesFormProps) {
       </form>
 
       {/* Divider */}
-      <div
-        style={{
-          borderTop: "1px solid var(--puck-color-grey-09)",
-          margin: "8px 0",
-        }}
-      />
+      <div className="border-t border-border my-2" />
 
       {/* SEO Metadata Section */}
       <div className="mb-16">
-        <h3 className="text-xs font-semibold mb-3 text-gray-500">
+        <h3 className="text-xs font-semibold mb-3 text-muted-foreground">
           SEO Metadata
         </h3>
-        <p className="text-xs mb-4">
+        <p className="text-xs mb-4 text-muted-foreground">
           SEO settings are managed per locale in the page editor.
         </p>
       </div>

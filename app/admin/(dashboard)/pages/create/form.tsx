@@ -12,6 +12,7 @@ import { Type, Link2, FileText, Eye } from "lucide-react";
 import { useFormRegistry } from "@/lib/form-actions";
 import { useNotifications } from "@/contexts/notification-context";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 function slugify(text: string): string {
   return text
@@ -23,6 +24,8 @@ function slugify(text: string): string {
 }
 
 export function CreatePageForm() {
+  const router = useRouter()
+
   const [state, formAction] = useActionState(createPageAction, {});
   const [isDirty, setIsDirty] = useState(false);
   const [isPending, setIsPending] = useState(false);
@@ -30,6 +33,7 @@ export function CreatePageForm() {
   const slugManuallyEdited = useRef(false);
 
   const { showSuccess, showError } = useNotifications();
+
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value;
@@ -66,6 +70,7 @@ export function CreatePageForm() {
       setIsDirty(false);
       formRef.current?.reset();
       slugManuallyEdited.current = false;
+      router.replace('/admin')
     }
     if (state?.errors?.formErrors) {
       showError(state.errors.formErrors.join("\n"));

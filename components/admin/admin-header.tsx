@@ -10,6 +10,7 @@ import {
 } from "@/contexts/admin-layout-context";
 import { HeaderAction } from "@/types";
 import { useEffect, useMemo } from "react";
+import { cn } from "@/lib/utils";
 
 export function AdminHeader() {
   const pathname = usePathname();
@@ -46,6 +47,7 @@ export function AdminHeader() {
     setActions([
       {
         label: "Logout",
+        variant: "secondary",
         icon: <LogOut className="w-3.5 h-3.5" />,
         onClick: logout,
       },
@@ -54,9 +56,9 @@ export function AdminHeader() {
 
   return (
     <header className="admin-area bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100 relative max-w-screen">
-      <div className="flex items-center gap-4 px-4 py-2" style={{ gap: "var(--puck-space-px)", padding: "var(--puck-space-px)" }}>
+      <div className="flex items-center gap-4 px-4 py-2 justify-between" style={{ gap: "var(--puck-space-px)", padding: "var(--puck-space-px)" }}>
         {/* Left side - Toggle buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center">
           <Button
             variant="ghost"
             size="icon-sm"
@@ -64,21 +66,21 @@ export function AdminHeader() {
             onClick={toggleSidebarLeft}
             className={sidebarLeftVisible ? "text-foreground" : "text-muted-foreground"}
           >
-            <PanelLeft focusable="false" className="h-4 w-4" />
+            <PanelLeft className="w-6 h-6" />
           </Button>
           <Button
             variant="ghost"
             size="icon-sm"
             title="Toggle right sidebar"
             onClick={toggleSidebarRight}
-            className={sidebarRightVisible ? "text-foreground" : "text-muted-foreground"}
+            className={cn(sidebarRightVisible ? "text-foreground" : "text-muted-foreground", "p-0")}
           >
-            <PanelRight focusable="false" className="h-4 w-4" />
+            <PanelRight className="w-6 h-6" />
           </Button>
         </div>
 
         {/* Middle - Title */}
-        <div className="flex-1">
+        <div className="flex-1 hidden">
           <h1 className="text-sm font-semibold" style={{ fontSize: "var(--puck-font-size-xxs)", fontWeight: 500 }}>
             {title}
           </h1>
@@ -105,32 +107,15 @@ export function AdminHeader() {
 }
 
 function HeaderActionItem({ action }: { action: HeaderAction }) {
-  const actionType = useMemo(() => {
-    if (typeof action !== "object" && action !== null) {
-      return null;
-    }
 
-    if ("options" in action) {
-      return "dropdown";
-    } else if ("href" in action) {
-      return "link";
-    } else if ("onClick" in action) {
-      return "button";
-    }
-
-    return null;
-  }, [action]);
 
   if (isButtonAction(action)) {
+    const {label, icon, ...rest} = action;
     return (
-      <Button
-        key={action.label}
-        variant={action?.variant || "secondary"}
-        onClick={action.onClick}
-        icon={action.icon}
-      >
-        {action.label}
-      </Button>
+      <Button {...rest}>
+        { icon }
+        { label }
+      </Button> 
     );
   }
 }

@@ -70,7 +70,8 @@ label: string;
 };
 export type HeaderActionButton = HeaderActionBase & {
   onClick: () => void;
-  variant?: "primary" | "secondary";
+  variant?: "primary" | "secondary" | "ghost";
+  size?: "default" | "sm" | "lg" | "icon-sm" | "icon-lg" | "medium" | "large" | "icon" | null;
 };
 export type HeaderActionLink = HeaderActionBase & {
   label: string;
@@ -80,7 +81,9 @@ export type HeaderActionLink = HeaderActionBase & {
 export type HeaderActionDropdown = HeaderActionBase & {
   options: Array<HeaderActionButton | HeaderActionLink>;
 };
+
 export type HeaderAction = HeaderActionButton | HeaderActionLink | HeaderActionDropdown;
+
 export type AdminLayoutState = {
   sidebarLeftVisible: boolean;
   setSidebarLeftVisible: (visible: boolean) => void;
