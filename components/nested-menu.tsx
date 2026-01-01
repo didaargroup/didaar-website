@@ -27,6 +27,11 @@ interface NestedMenuProps {
   onItemClick?: () => void;
 }
 
+// Normalize slug: convert "home" to "/"
+const normalizeSlug = (slug: string) => {
+  return slug.startsWith("home") ? slug.replace("home", "/") : slug;
+};
+
 export function NestedMenu({ items, isMobile = false, onItemClick }: NestedMenuProps) {
   const locale = useLocale();
   const isRTL = locale === "fa";
@@ -54,7 +59,7 @@ function MenuItemDesktop({ item, isRTL }: { item: MenuItem; isRTL: boolean }) {
   if (!hasChildren) {
     return (
       <Link
-        href={item.fullPath || `/${item.slug}`}
+        href={normalizeSlug(item.fullPath || `/${item.slug}`)}
         className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
       >
         {item.title}
@@ -83,7 +88,7 @@ function MenuItemDesktop({ item, isRTL }: { item: MenuItem; isRTL: boolean }) {
           <React.Fragment key={child.id}>
             <DropdownMenuItem asChild>
               <Link
-                href={child.fullPath || `/${child.slug}`}
+                href={normalizeSlug(child.fullPath || `/${child.slug}`)}
                 className={cn(
                   "relative flex cursor-pointer select-none items-center",
                   "rounded-sm px-2 py-1.5 text-sm outline-none",

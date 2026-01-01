@@ -24,6 +24,11 @@ interface MobileMenuProps {
   onItemClick?: () => void;
 }
 
+// Normalize slug: convert "home" to "/"
+const normalizeSlug = (slug: string) => {
+  return slug.startsWith("home") ? slug.replace("home", "/") : slug;
+};
+
 export function MobileMenu({ items, onItemClick }: MobileMenuProps) {
   return (
     <div className="space-y-1">
@@ -40,7 +45,7 @@ function MenuItem({ item, onItemClick, level = 0 }: { item: MenuItem; onItemClic
   if (!hasChildren) {
     return (
       <Link
-        href={item.fullPath || `/${item.slug}`}
+        href={normalizeSlug(item.fullPath || `/${item.slug}`)}
         onClick={onItemClick}
         className={cn(
           "block px-3 py-2.5 rounded-md text-sm font-medium",
@@ -59,7 +64,7 @@ function MenuItem({ item, onItemClick, level = 0 }: { item: MenuItem; onItemClic
       <AccordionItem value={item.id.toString()} className="border-none">
         <div className="group flex items-center gap-1">
           <Link
-            href={item.fullPath || `/${item.slug}`}
+            href={normalizeSlug(item.fullPath || `/${item.slug}`)}
             onClick={onItemClick}
             className={cn(
               "flex-1 px-3 py-2.5 rounded-md text-sm font-medium",
