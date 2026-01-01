@@ -12,5 +12,17 @@
     "copyright": "© ۲۰۲۵ پاکد. تمامی حقوق محفوظ است.",
     "quickLinks": "لینک‌های سریع",
     "socialLinks": "ما را دنبال کنید"
+  },
+  "Search": {
+    "title": "جستجو",
+    "placeholder": "جستجو در صفحات...",
+    "noResults": "صفحه‌ای با نام \"{query}\" یافت نشد",
+    "minChars": "حداقل ۲ کاراکتر وارد کنید",
+    "resultsFound": "{count} نتیجه یافت شد",
+    "keyboardHints": {
+      "navigate": "برای حرکت",
+      "select": "برای انتخاب",
+      "close": "برای بستن"
+    }
   }
 }

@@ -12,5 +12,17 @@
     "copyright": "© 2025 Pucked. All rights reserved.",
     "quickLinks": "Quick Links",
     "socialLinks": "Follow Us"
+  },
+  "Search": {
+    "title": "Search",
+    "placeholder": "Search pages...",
+    "noResults": "No pages found for \"{query}\"",
+    "minChars": "Type at least 2 characters to search",
+    "resultsFound": "{count} {count, plural, one {result} other {results}} found",
+    "keyboardHints": {
+      "navigate": "to navigate",
+      "select": "to select",
+      "close": "to close"
+    }
   }
 }
