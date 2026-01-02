@@ -1,4 +1,4 @@
-import type { ComponentData, Data } from "@measured/puck";
+import type { ComponentData, Data, Slot } from "@measured/puck";
 
 /**
  * Props for each component type in your Puck config
@@ -10,9 +10,9 @@ export type ComponentProps = {
     level?: 1 | 2 | 3 | 4 | 5 | 6;
   };
   GridBlock: {
-    content: React.ComponentType<any>;
-    columns?: 1 | 2 | 3 | 4;
-    gap?: number;
+    items: Slot;
+    columns: 1 | 2 | 3 | 4;
+    gap: number;
   };
   LinkBlock: {
     linkType: "internal" | "external";
