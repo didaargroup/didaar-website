@@ -1,12 +1,14 @@
-import type { ComponentConfig } from "@measured/puck";
+import type { ComponentConfig, Slot } from "@measured/puck";
 
-export const GridBlock: ComponentConfig<{
-  content: React.ComponentType<any>;
-  columns?: 1 | 2 | 3 | 4;
-  gap?: number;
-}> = {
+export type GridBlockProps = {
+  items: Slot;
+  columns: 1 | 2 | 3 | 4;
+  gap: number;
+};
+
+export const GridBlock: ComponentConfig<GridBlockProps> = {
   fields: {
-    content: {
+    items: {
       type: "slot",
     },
     columns: {
@@ -20,16 +22,18 @@ export const GridBlock: ComponentConfig<{
     },
     gap: {
       type: "number",
+      min: 0,
+      max: 64,
     },
   },
   defaultProps: {
-    content: () => null,
+    items: [],
     columns: 2,
     gap: 16,
   },
-  render: ({ columns, gap, content: Content }) => {
+  render: ({ columns, gap, items: Items }) => {
     return (
-      <Content
+      <Items
         style={{
           display: "grid",
           gridTemplateColumns: `repeat(${columns || 2}, 1fr)`,
